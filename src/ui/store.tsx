@@ -92,20 +92,54 @@ export interface AppData {
   meals: Meal[];
   settings: AppSettings;
   ready: boolean;
+  /** Gesetzt, wenn der lokale Speicher nicht nutzbar ist. */
+  storageError: string | null;
+}
+
+/**
+ * Uebersetzt ein Speicherproblem in eine Anweisung, mit der man etwas anfangen
+ * kann. Ohne diese Meldung haenge die App stumm in "Daten werden geladen ..." --
+ * genau der weisse Bildschirm, den es nicht geben soll.
+ */
+function describeStorageError(error: unknown): string {
+  const name = error instanceof Error ? error.name : '';
+  const hint =
+    'Alle Daten dieser App liegen im lokalen Speicher des Browsers. Ohne ihn kann nichts gespeichert werden.';
+
+  if (name === 'QuotaExceededError') {
+    return `Der Speicher dieses Browsers ist voll. ${hint} Bitte Speicherplatz freigeben und die Seite neu laden.`;
+  }
+  if (name === 'SecurityError' || name === 'InvalidStateError') {
+    return `Der Browser verweigert den Zugriff auf den lokalen Speicher. Das passiert im privaten Modus und wenn Website-Daten blockiert sind. ${hint} Bitte ein normales Fenster verwenden und in den Safari-Einstellungen unter „Datenschutz“ das Blockieren von Cookies bzw. Website-Daten deaktivieren.`;
+  }
+  return `Der lokale Speicher (IndexedDB) ist nicht erreichbar. Das passiert vor allem im privaten Modus von Safari oder wenn Website-Daten blockiert sind. ${hint} Bitte ein normales Browserfenster verwenden und die Seite neu laden.`;
 }
 
 export function useAppData(): AppData {
   const [seeded, setSeeded] = useState(false);
+  const [storageError, setStorageError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    ensureSeeded()
+
+    // IndexedDB kann in Safari nicht nur scheitern, sondern schlicht nie
+    // antworten. Deshalb ein Zeitlimit statt eines endlosen Ladezustands.
+    const timeout = new Promise<never>((_, reject) => {
+      window.setTimeout(() => reject(new Error('Zeitueberschreitung')), 8000);
+    });
+
+    Promise.race([ensureSeeded(), timeout])
+      .then(() => {
+        if (!cancelled) setStorageError(null);
+      })
       .catch((error: unknown) => {
-        console.error('Stammdaten konnten nicht angelegt werden', error);
+        console.error('Lokaler Speicher nicht nutzbar', error);
+        if (!cancelled) setStorageError(describeStorageError(error));
       })
       .finally(() => {
         if (!cancelled) setSeeded(true);
       });
+
     return () => {
       cancelled = true;
     };
@@ -132,6 +166,7 @@ export function useAppData(): AppData {
     meals: result?.meals ?? [],
     settings: result?.settings ?? defaultSettings(),
     ready: seeded && result !== undefined,
+    storageError,
   };
 }
 

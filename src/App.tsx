@@ -1,4 +1,4 @@
-import { AppProvider, useApp } from './ui/store';
+import { AppProvider, useApp, useAppData } from './ui/store';
 import { ErrorBoundary } from './ui/components/ErrorBoundary';
 import { Toasts } from './ui/components/Toasts';
 import { WeekPlanView } from './ui/views/WeekPlanView';
@@ -14,8 +14,28 @@ const NAV: Array<{ id: ViewName; label: string; icon: string }> = [
   { id: 'settings', label: 'Einstellungen', icon: '⚙️' },
 ];
 
+/** Blockierende Meldung, wenn der lokale Speicher nicht nutzbar ist. */
+function StorageErrorNotice({ message }: { message: string }) {
+  return (
+    <div role="alert" className="flex min-h-0 flex-1 items-center justify-center p-4">
+      <div className="card max-w-xl p-6">
+        <h1 className="text-xl font-bold">Speicher nicht verfügbar</h1>
+        <p className="mt-3 text-[color:var(--color-muted)]">{message}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="tap mt-5 rounded-xl bg-[color:var(--color-terracotta)] px-5 font-semibold text-white"
+        >
+          Seite neu laden
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Shell() {
   const { view, setView } = useApp();
+  const { storageError } = useAppData();
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-x-hidden">
@@ -52,10 +72,11 @@ function Shell() {
       </header>
 
       <main className="min-h-0 flex-1 overflow-hidden p-2 sm:p-3 xl:p-4">
-        {view === 'plan' && <WeekPlanView />}
-        {view === 'shopping' && <ShoppingListView />}
-        {view === 'meals' && <MealsView />}
-        {view === 'settings' && <SettingsView />}
+        {storageError && <StorageErrorNotice message={storageError} />}
+        {!storageError && view === 'plan' && <WeekPlanView />}
+        {!storageError && view === 'shopping' && <ShoppingListView />}
+        {!storageError && view === 'meals' && <MealsView />}
+        {!storageError && view === 'settings' && <SettingsView />}
       </main>
 
       <Toasts />
