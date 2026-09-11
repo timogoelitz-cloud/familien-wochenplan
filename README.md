@@ -75,12 +75,25 @@ wie eine eigene App.
 > Der Dev-Server muss dabei auf dem Mac laufen. Für dauerhafte Nutzung ohne laufenden Mac siehe
 > [Später einmal](#später-einmal) am Ende dieser Datei.
 
-**Wenn das iPad die Seite nicht erreicht:**
+**Alternative zur IP-Adresse:** Der Bonjour-Name des Macs funktioniert ebenfalls und ändert sich –
+anders als die per DHCP vergebene IP – nicht. Er steht in Systemeinstellungen → Allgemein → Info
+→ Name; im Terminal liefert ihn `scutil --get LocalHostName`. Aufruf dann z. B.
+`http://timos-macbook.local:5173`.
 
-- Firewall auf dem Mac prüfen (Systemeinstellungen → Netzwerk → Firewall) – eingehende Verbindungen
-  für Node erlauben.
-- Sicherstellen, dass beide Geräte im selben WLAN sind (nicht Gast-WLAN, nicht Mobilfunk).
-- `http://` verwenden, nicht `https://`.
+**Wenn das Gerät die Seite nicht erreicht** („Server nicht gefunden“) – der Reihe nach prüfen:
+
+1. Läuft `npm run dev` auf dem Mac noch? Das Terminal muss offen bleiben.
+2. Stimmt die Adresse? `http://`, nicht `https://`, und der Port `:5173` gehört dazu.
+   `localhost` funktioniert nur auf dem Mac selbst.
+3. Sind beide Geräte im **selben** WLAN? Kein Gast-WLAN, kein Mobilfunk. Am iPhone testweise
+   Mobilfunk ausschalten.
+4. Firewall am Mac: Systemeinstellungen → Netzwerk → Firewall – eingehende Verbindungen für Node
+   erlauben oder die Firewall kurz abschalten.
+5. Am iPhone/iPad **iCloud Private Relay** testweise ausschalten
+   (Einstellungen → Apple-ID → iCloud → Private Relay).
+6. Manche Router trennen WLAN-Geräte voneinander („Client-Isolation“, oft in Gastnetzen).
+   Schnelltest: am iPhone einen persönlichen Hotspot aufmachen, den Mac damit verbinden,
+   `npm run dev` neu starten und die dann angezeigte Network-Adresse verwenden.
 
 ---
 

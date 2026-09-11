@@ -35,8 +35,18 @@ export default defineConfig({
     }),
   ],
   server: {
+    // Auf allen Netzwerkschnittstellen lauschen, damit iPad und iPhone im
+    // selben WLAN zugreifen koennen.
     host: '0.0.0.0',
     port: 5173,
+    /*
+     * Vite lehnt Anfragen mit unbekanntem Host-Namen ab (Schutz vor
+     * DNS-Rebinding). IP-Adressen sind ohnehin erlaubt; zusaetzlich wird hier
+     * der Bonjour-Name des Rechners freigegeben ("Timos-MacBook.local").
+     * Der ist im Heimnetz stabil, waehrend die IP sich per DHCP aendern kann.
+     * Bewusst nur dieses eine Suffix statt allowedHosts: true.
+     */
+    allowedHosts: ['.local'],
   },
   preview: {
     host: '0.0.0.0',
