@@ -35,7 +35,6 @@ export const DEFAULT_MERCHANTS: Merchant[] = [
 export function defaultSettings(): AppSettings {
   return {
     id: 'app',
-    defaultShareEmail: 'sandra@example.com',
     appleReminderListName: 'Einkaufen',
     appleShortcutName: 'Einkaufsliste uebernehmen',
     updatedAt: nowISO(),

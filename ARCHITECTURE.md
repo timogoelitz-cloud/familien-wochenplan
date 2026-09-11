@@ -50,7 +50,7 @@ src/
     backup.ts            Sicherung und Wiederherstellung
   services/
     pdf.ts               Einkaufsliste als A4-PDF (jsPDF, lazy geladen)
-    share.ts             Web Share API, Download, mailto, Zwischenablage
+    share.ts             Web Share API, Download, Zwischenablage
   ui/
     store.tsx            App-Zustand + Live-Daten aus IndexedDB
     theme.ts             Farben für Personen und Wochentage
@@ -103,9 +103,9 @@ das Ziehen erst nach kurzem Halten (180 ms), damit die Tagesliste weiter normal 
 schreiben erst danach. Ein halb eingespieltes Backup wäre schlimmer als gar keines. Fehler werden
 gesammelt und mit Pfadangabe gemeldet (`meals[3].ingredients[1].unit`), nicht einzeln nacheinander.
 
-**Kein Mailversand im Frontend.** Er bräuchte Zugangsdaten im Browser, die jeder auslesen könnte.
-Stattdessen Web Share API mit PDF; die Schnittstelle `MailProvider` in `src/services/share.ts`
-beschreibt, wie ein späterer serverseitiger Versand andockt – ohne heute etwas vorzutäuschen.
+**Die App verschickt keine Mails.** Sie erzeugt das PDF und übergibt es der Web Share API; das
+Versenden übernimmt das Gerät mit seinen eigenen Programmen. Damit gibt es keinen Mail-Code, keine
+Zugangsdaten und keinen Server – und der Nutzer behält die Kontrolle darüber, was wohin geht.
 
 **jsPDF wird erst beim ersten PDF geladen.** Die Bibliothek wiegt rund 400 kB; der Wochenplan
 braucht sie nicht. Das halbiert die Startgröße auf dem iPad.
@@ -123,7 +123,6 @@ Die Architektur hält diese Wege offen, ohne heute Komplexität dafür einzubaue
 - **Serverbetrieb / Synchronisation.** Nur `src/data/` müsste ausgetauscht werden; Domain und UI
   bleiben unberührt.
 - **KI-Bildgenerierung.** Das Datenmodell unterstützt Bilder bereits (Upload als Data-URL oder URL).
-  Ein Anbieter wäre als Service nach dem Muster von `MailProvider` zu ergänzen – ohne Schlüssel im
-  Code.
+  Ein Anbieter wäre als eigener Service unter `src/services/` zu ergänzen – ohne Schlüssel im Code.
 - **Haushaltskosten.** Bewusst nicht vorbereitet. Preise, Kassenzettel und Budgets hätten das
   Datenmodell ohne heutigen Nutzen belastet.

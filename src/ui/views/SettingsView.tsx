@@ -209,15 +209,6 @@ export function SettingsView() {
 
         <Section title="Teilen und Erinnerungen">
           <label className="block">
-            <span className="block text-sm font-semibold">Standard-Mailadresse</span>
-            <input
-              type="email"
-              className="tap w-full rounded-xl border border-[color:var(--color-line)] px-3"
-              defaultValue={settings.defaultShareEmail}
-              onBlur={(event) => void saveSettings({ ...settings, defaultShareEmail: event.target.value.trim() })}
-            />
-          </label>
-          <label className="mt-3 block">
             <span className="block text-sm font-semibold">Liste in Apple Erinnerungen</span>
             <input
               className="tap w-full rounded-xl border border-[color:var(--color-line)] px-3"
@@ -234,9 +225,10 @@ export function SettingsView() {
             />
           </label>
           <p className="mt-3 text-sm text-[color:var(--color-muted)]">
-            Ein automatischer Mailversand ist bewusst nicht eingebaut: Er bräuchte Zugangsdaten im Browser.
-            Die Einkaufsliste wird stattdessen als PDF geteilt – auf dem iPad lässt sich dort „Mail“ auswählen.
-            Wie der Kurzbefehl für Apple Erinnerungen eingerichtet wird, steht in <code>docs/APPLE_SHORTCUT.md</code>.
+            Die App verschickt selbst keine Mails. „Teilen“ übergibt die Einkaufsliste als PDF an das
+            Teilen-Menü des Geräts – dort lässt sich auf dem iPad Mail, Nachrichten oder was sonst
+            gewünscht ist auswählen. Wie der Kurzbefehl für Apple Erinnerungen eingerichtet wird, steht
+            in <code>docs/APPLE_SHORTCUT.md</code>.
           </p>
         </Section>
 

@@ -102,8 +102,8 @@ sie nicht ungültig: Zeilen, die es nicht mehr gibt, werden schlicht ignoriert.
 
 ### AppSettings
 
-Singleton mit `id: 'app'`: Standard-Mailadresse (`sandra@example.com`), Name der
-Apple-Erinnerungen-Liste (`Einkaufen`) und Name des Kurzbefehls.
+Singleton mit `id: 'app'`: Name der Apple-Erinnerungen-Liste (`Einkaufen`) und Name des
+Kurzbefehls, der sie befüllt.
 
 ## Einheiten und Dimensionen
 

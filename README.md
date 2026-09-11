@@ -131,12 +131,10 @@ Händler. `400 g Tomaten` und `2 Dosen Tomaten` bleiben deshalb bewusst getrennt
 | --- | --- |
 | **PDF** | Erzeugt `Einkaufsliste_KW38_2026.pdf` (A4, druckfertig, mit Kästchen zum Abhaken). |
 | **Teilen** | Öffnet das iPadOS-Teilen-Menü mit dem PDF. Dort lässt sich **Mail** wählen – das PDF hängt dann schon dran. Kann der Browser keine Dateien teilen (z. B. Desktop-Firefox), wird das PDF stattdessen heruntergeladen. |
-| **Mail** | Öffnet das Mailprogramm mit vorbereitetem Betreff und Listentext an die in den Einstellungen hinterlegte Adresse. Anhänge kann ein Browser dabei nicht selbst setzen – dafür ist **Teilen** der bessere Weg. |
 | **In Apple Erinnerungen** | Kopiert die Liste im passenden Format in die Zwischenablage. Einrichtung des Kurzbefehls: [`docs/APPLE_SHORTCUT.md`](docs/APPLE_SHORTCUT.md). |
 
-Ein **automatischer Mailversand ist bewusst nicht eingebaut.** Er bräuchte Zugangsdaten im Browser,
-die dort jeder auslesen könnte. Die Schnittstelle für einen späteren serverseitigen Versand ist in
-`src/services/share.ts` (`MailProvider`) vorbereitet.
+Die App **verschickt selbst keine Mails.** Das Versenden übernimmt das Gerät: **Teilen** übergibt das
+fertige PDF an das Teilen-Menü, dort wählt man Mail aus und schreibt die Nachricht wie gewohnt.
 
 ### Gerichte
 
@@ -148,8 +146,8 @@ allen Daten erhalten. Löschen entfernt das Gericht auch aus allen Wochenplänen
 
 ### Einstellungen
 
-Familienmitglieder (Name, Kürzel, Farbe), Händler, Standard-Mailadresse, Name der Apple-Erinnerungen-Liste
-sowie **Daten sichern / wiederherstellen**.
+Familienmitglieder (Name, Kürzel, Farbe), Händler, Name der Apple-Erinnerungen-Liste sowie
+**Daten sichern / wiederherstellen**.
 
 ---
 
@@ -211,8 +209,6 @@ Nichts davon ist für Version 1 nötig; die Architektur lässt es aber zu:
 
 - **Hosting/Domain** – `npm run build` erzeugt statische Dateien, die auf jedem Webspace liegen
   können. Dann wäre die App auch ohne laufenden Mac erreichbar.
-- **Automatischer Mailversand** – braucht einen kleinen Server. Schnittstelle: `MailProvider`
-  in `src/services/share.ts`.
 - **GPT-Rezeptimport** – Prompt liegt bereit, der Importweg ist fertig.
 - **GPT-Bildgenerierung** – das Datenmodell unterstützt Bilder bereits; es fehlt nur der Anbieter.
 - **Apple Erinnerungen** – heute über Kurzbefehl + Zwischenablage; eine direkte API gibt es für

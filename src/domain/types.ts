@@ -149,8 +149,6 @@ export interface WeekPlan {
 /** Anwendungseinstellungen (Singleton, id === "app"). */
 export interface AppSettings {
   id: 'app';
-  /** Standardempfaenger fuer das Teilen der Einkaufsliste. */
-  defaultShareEmail: string;
   /** Name der Ziel-Liste in Apple Erinnerungen. */
   appleReminderListName: string;
   /** Optionaler Apple-Kurzbefehl-Name fuer die Uebergabe. */

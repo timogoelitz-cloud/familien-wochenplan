@@ -12,7 +12,6 @@ import { shoppingListFileName, shoppingListPdfBlob } from '../../services/pdf';
 import {
   copyToClipboard,
   downloadBlob,
-  openMailDraft,
   shareShoppingList,
   shoppingListAsReminderLines,
 } from '../../services/share';
@@ -177,9 +176,6 @@ export function ShoppingListView() {
           </button>
           <button type="button" onClick={() => void handleShare()} disabled={isEmpty || busy} className="tap rounded-xl bg-[color:var(--color-terracotta)] px-4 font-semibold text-white disabled:opacity-40">
             {busy ? 'Einen Moment…' : 'Teilen'}
-          </button>
-          <button type="button" onClick={() => openMailDraft(printList, settings)} disabled={isEmpty} className="tap rounded-xl border border-[color:var(--color-line)] bg-white px-4 font-semibold disabled:opacity-40">
-            Mail
           </button>
           <button type="button" onClick={() => void handleReminders()} disabled={isEmpty} className="tap rounded-xl border border-[color:var(--color-line)] bg-white px-4 font-semibold disabled:opacity-40">
             In Apple Erinnerungen
