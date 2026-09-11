@@ -1,0 +1,46 @@
+{
+  "format": "familien-wochenplan/meals",
+  "version": 1,
+  "_hinweis": "DEMO-DATEN zum Ausprobieren der App. Das sind KEINE echten Familienrezepte. Die 17 echten Gerichte werden über data/meals.seed.json importiert.",
+  "meals": [
+    {
+      "name": "DEMO: Nudeln mit Tomatensauce",
+      "description": "Demo-Gericht zum Ausprobieren.",
+      "recipe": "Nudeln kochen. Zwiebeln anschwitzen, Tomaten zugeben, köcheln lassen, abschmecken.",
+      "servings": 4,
+      "demo": true,
+      "ingredients": [
+        { "name": "Spaghetti", "amount": 500, "unit": "g", "merchant": "Kück Biomarkt", "packageSize": { "amount": 500, "unit": "g" } },
+        { "name": "Passierte Tomaten", "amount": 2, "unit": "Glas", "merchant": "ALDI" },
+        { "name": "Zwiebeln", "amount": 2, "unit": "Stk" },
+        { "name": "Olivenöl", "amount": 3, "unit": "EL", "merchant": "Kück Biomarkt" }
+      ]
+    },
+    {
+      "name": "DEMO: Nudelauflauf",
+      "description": "Demo-Gericht – teilt sich Zutaten mit dem Demo-Nudelgericht.",
+      "recipe": "Nudeln vorkochen, mit Sauce und Käse schichten, 25 Minuten überbacken.",
+      "servings": 4,
+      "demo": true,
+      "ingredients": [
+        { "name": "Spaghetti", "amount": 300, "unit": "g", "merchant": "Kück Biomarkt", "packageSize": { "amount": 500, "unit": "g" } },
+        { "name": "Geriebener Käse", "amount": 200, "unit": "g", "merchant": "Kück Biomarkt", "packageSize": { "amount": 150, "unit": "g" } },
+        { "name": "Sahne", "amount": 400, "unit": "ml", "merchant": "ALDI", "packageSize": { "amount": 200, "unit": "ml" } },
+        { "name": "Zwiebeln", "amount": 1, "unit": "Stk" }
+      ]
+    },
+    {
+      "name": "DEMO: Großer Salat",
+      "description": "Demo-Gericht für den Fall, dass jemand am selben Tag etwas anderes isst.",
+      "recipe": "Salat waschen, Gemüse klein schneiden, Dressing anrühren.",
+      "servings": 2,
+      "demo": true,
+      "ingredients": [
+        { "name": "Kopfsalat", "amount": 1, "unit": "Stk", "merchant": "Biolandhof" },
+        { "name": "Gurke", "amount": 1, "unit": "Stk", "merchant": "Biolandhof" },
+        { "name": "Tomaten", "amount": 250, "unit": "g", "merchant": "Biolandhof" },
+        { "name": "Olivenöl", "amount": 2, "unit": "EL", "merchant": "Kück Biomarkt" }
+      ]
+    }
+  ]
+}

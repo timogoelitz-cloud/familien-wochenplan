@@ -1,0 +1,29 @@
+{
+  "format": "familien-wochenplan/meals",
+  "version": 1,
+  "meals": [
+    {
+      "name": "BEISPIEL: Nudeln mit Tomatensauce",
+      "description": "Ausgefülltes Beispiel, das alle Felder zeigt – kein echtes Familienrezept.",
+      "recipe": "Nudeln nach Packungsangabe kochen. Zwiebeln würfeln und anschwitzen, Tomaten zugeben, 15 Minuten köcheln lassen, abschmecken.",
+      "servings": 4,
+      "demo": true,
+      "tags": ["schnell", "vegetarisch"],
+      "ingredients": [
+        {
+          "name": "Spaghetti",
+          "amount": 800,
+          "unit": "g",
+          "merchant": "Kück Biomarkt",
+          "category": "Trockenware",
+          "packageSize": { "amount": 500, "unit": "g" },
+          "note": "Bedarf 800 g ergibt mit 500-g-Packungen 2 Packungen."
+        },
+        { "name": "Passierte Tomaten", "amount": 2, "unit": "Glas", "merchant": "ALDI" },
+        { "name": "Zwiebeln", "amount": 2, "unit": "Stk", "merchant": null },
+        { "name": "Olivenöl", "amount": 3, "unit": "EL", "merchant": "Kück Biomarkt" },
+        { "name": "Salz", "amount": 1, "unit": "Prise" }
+      ]
+    }
+  ]
+}

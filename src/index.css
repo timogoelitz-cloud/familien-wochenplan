@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/*
+ * Farb- und Groessensystem.
+ * Die Basisgroessen sind fuer Fingerbedienung auf dem iPad ausgelegt:
+ * Tippflaechen nie unter 44 px, grosszuegige Abstaende, kraeftige Typografie.
+ */
+@theme {
+  --color-cream: #fbf7f0;
+  --color-parchment: #f4ede1;
+  --color-ink: #2f2a26;
+  --color-muted: #77706a;
+  --color-line: #e3d9c9;
+
+  --color-terracotta: #e07a5f;
+  --color-terracotta-dark: #c4593c;
+  --color-sage: #6b9080;
+  --color-sage-dark: #4e6f61;
+
+  --color-ocean: #3f7cac;
+  --color-berry: #b5527f;
+  --color-leaf: #5b8c3e;
+  --color-sun: #d99a1f;
+
+  --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 1.1rem;
+}
+
+@layer base {
+  html {
+    /* Verhindert das Auto-Zoomen von Safari beim Fokussieren von Feldern. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    /* Kein Gummiband-Scrollen der ganzen Seite auf iPadOS. */
+    overscroll-behavior: none;
+  }
+
+  /* Beim Ziehen soll Safari nicht gleichzeitig scrollen oder Text markieren. */
+  [data-draggable='true'] {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+
+  /* Sichtbarer Fokus fuer Tastaturbedienung, aber nicht bei Mausklicks. */
+  :focus-visible {
+    outline: 3px solid var(--color-terracotta);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    background-color: white;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    box-shadow: 0 1px 2px rgb(47 42 38 / 0.05);
+  }
+
+  /* Mindestgroesse aller Tippziele. */
+  .tap {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.18s ease-out;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

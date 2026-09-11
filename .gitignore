@@ -1,0 +1,33 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Testartefakte
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# Editor / Betriebssystem
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Persoenliche Daten: eigene Sicherungen und Exporte gehoeren nicht ins Repository.
+*.backup.json
+Wochenplan-Sicherung_*.json
+Gerichte_*.json

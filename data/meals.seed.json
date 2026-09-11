@@ -1,0 +1,19 @@
+{
+  "format": "familien-wochenplan/meals",
+  "version": 1,
+  "_hinweis": [
+    "HIER KOMMEN UNSERE 17 ECHTEN FAMILIENGERICHTE HINEIN.",
+    "Diese Datei ist absichtlich leer: Rezepte, Mengen und Händlerzuordnungen",
+    "wurden NICHT geraten oder rekonstruiert.",
+    "",
+    "So wird sie befüllt:",
+    "1. Jedes Gericht als Objekt in \"meals\" eintragen (Format siehe meal.schema.json,",
+    "   ausgefülltes Beispiel siehe meals.example.json).",
+    "2. In der App auf \"Gerichte\" -> \"Importieren\" gehen und diese Datei auswählen.",
+    "3. Die App prüft alles vorab. Bei einem Fehler wird NICHTS importiert und",
+    "   genau angezeigt, welche Zeile das Problem verursacht.",
+    "",
+    "Der Schlüssel \"_hinweis\" wird beim Import ignoriert."
+  ],
+  "meals": []
+}
