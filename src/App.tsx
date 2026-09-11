@@ -18,13 +18,13 @@ function Shell() {
   const { view, setView } = useApp();
 
   return (
-    <div className="flex h-[100dvh] flex-col">
-      <header className="no-print flex items-center gap-3 border-b border-[color:var(--color-line)] bg-white/70 px-3 py-2 backdrop-blur sm:px-5">
-        <span className="flex items-center gap-2 font-extrabold">
+    <div className="flex h-[100dvh] flex-col overflow-x-hidden">
+      <header className="no-print flex items-center gap-3 border-b border-[color:var(--color-line)] bg-white/70 px-3 py-2 backdrop-blur sm:px-4">
+        <span className="flex shrink-0 items-center gap-2 font-extrabold whitespace-nowrap">
           <span aria-hidden="true" className="text-2xl">
             🥘
           </span>
-          <span className="hidden sm:inline">Familien-Wochenplan</span>
+          <span className="hidden lg:inline">Familien-Wochenplan</span>
         </span>
 
         <nav aria-label="Hauptnavigation" className="ml-auto">
@@ -35,7 +35,7 @@ function Shell() {
                   type="button"
                   aria-current={view === entry.id ? 'page' : undefined}
                   onClick={() => setView(entry.id)}
-                  className={`tap flex items-center gap-2 rounded-xl px-3 font-semibold transition-colors sm:px-4 ${
+                  className={`tap flex items-center gap-2 rounded-xl px-3 font-semibold whitespace-nowrap transition-colors sm:px-4 ${
                     view === entry.id
                       ? 'bg-[color:var(--color-ink)] text-white'
                       : 'hover:bg-[color:var(--color-parchment)]'
@@ -51,7 +51,7 @@ function Shell() {
         </nav>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4">
+      <main className="min-h-0 flex-1 overflow-hidden p-2 sm:p-3 xl:p-4">
         {view === 'plan' && <WeekPlanView />}
         {view === 'shopping' && <ShoppingListView />}
         {view === 'meals' && <MealsView />}

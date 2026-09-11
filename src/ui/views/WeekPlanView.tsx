@@ -48,7 +48,7 @@ function PoolCard({ meal, armed, onArm }: { meal: Meal; armed: boolean; onArm: (
       <button
         type="button"
         onClick={onArm}
-        className="flex w-full items-center gap-3 p-2.5 text-left"
+        className="flex w-full items-center gap-2.5 p-2 text-left"
         {...attributes}
         {...listeners}
         // Nach dem Spread, damit der Vormerk-Zustand nicht von dnd-kit ueberschrieben wird.
@@ -58,20 +58,20 @@ function PoolCard({ meal, armed, onArm }: { meal: Meal; armed: boolean; onArm: (
           <img
             src={meal.image}
             alt=""
-            className="h-14 w-14 shrink-0 rounded-xl object-cover"
+            className="h-11 w-11 shrink-0 rounded-xl object-cover"
             draggable={false}
           />
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[color:var(--color-parchment)] text-2xl"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color:var(--color-parchment)] text-xl"
           >
             🍽️
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-bold">{meal.name}</span>
-          <span className="block truncate text-sm text-[color:var(--color-muted)]">
+          <span className="block truncate text-sm font-bold">{meal.name}</span>
+          <span className="block truncate text-xs text-[color:var(--color-muted)]">
             {meal.demo ? 'DEMO · ' : ''}
             {meal.ingredients.length} Zutat{meal.ingredients.length === 1 ? '' : 'en'}
           </span>
@@ -95,10 +95,10 @@ function MealPool({ meals, armedMealId, onArm }: { meals: Meal[]; armedMealId: I
   return (
     <section
       aria-label="Unsere Gerichte"
-      className="flex min-h-0 flex-col rounded-2xl border border-[color:var(--color-line)] bg-white/60 p-3"
+      className="flex flex-col rounded-2xl border border-[color:var(--color-line)] bg-white/60 p-3 md:min-h-0"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-lg font-bold">Unsere Gerichte</h2>
+        <h2 className="text-base font-bold whitespace-nowrap xl:text-lg">Unsere Gerichte</h2>
         <button
           type="button"
           className="text-sm font-semibold text-[color:var(--color-terracotta-dark)] underline"
@@ -120,7 +120,7 @@ function MealPool({ meals, armedMealId, onArm }: { meals: Meal[]; armedMealId: I
         className="tap mt-2 w-full rounded-xl border border-[color:var(--color-line)] bg-white px-3"
       />
 
-      <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+      <div className="mt-3 space-y-2 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-1">
         {visible.length === 0 && (
           <p className="rounded-xl bg-[color:var(--color-parchment)] p-4 text-sm text-[color:var(--color-muted)]">
             {meals.length === 0
@@ -244,21 +244,21 @@ function DayRow({
       data-testid={`day-${date}`}
       data-day-index={index}
       aria-label={`${weekdayName(date)}, ${formatDayMonthDE(date)}`}
-      className={`flex min-h-[5.5rem] shrink-0 gap-2 rounded-2xl border-2 p-2 transition-colors ${
+      className={`flex min-h-[4.25rem] shrink-0 gap-2 rounded-2xl border-2 p-1.5 transition-colors ${
         isOver
           ? 'border-[color:var(--color-terracotta)] bg-[#fdf0ec]'
           : `border-transparent ${tint!.soft}`
       }`}
     >
-      <div className="flex w-[4.5rem] shrink-0 flex-col items-center justify-start pt-1">
-        <span aria-hidden="true" className={`mb-1 h-1.5 w-8 rounded-full ${tint!.bar}`} />
-        <span className="text-base leading-none font-bold">
-          <span className="hidden sm:inline">{weekdayName(date)}</span>
-          <span className="sm:hidden">{WEEKDAY_SHORT[index]}</span>
+      <div className="flex w-14 shrink-0 flex-col items-center justify-start pt-1 lg:w-24">
+        <span aria-hidden="true" className={`mb-1 h-1.5 w-7 rounded-full ${tint!.bar}`} />
+        <span className="text-sm leading-none font-bold lg:text-base">
+          <span className="hidden lg:inline">{weekdayName(date)}</span>
+          <span className="lg:hidden">{WEEKDAY_SHORT[index]}</span>
         </span>
         <span className="mt-0.5 text-xs text-[color:var(--color-muted)]">{formatDayMonthDE(date)}</span>
         {isToday && (
-          <span className="mt-1 rounded-full bg-[color:var(--color-terracotta)] px-2 py-0.5 text-[0.65rem] font-bold text-white">
+          <span className="mt-1 rounded-full bg-[color:var(--color-terracotta)] px-1.5 py-0.5 text-[0.6rem] font-bold text-white">
             HEUTE
           </span>
         )}
@@ -266,7 +266,7 @@ function DayRow({
 
       <div className="flex min-w-0 flex-1 flex-wrap content-start gap-2">
         {assignments.map((assignment) => (
-          <div key={assignment.id} className="w-full min-w-0 sm:w-[calc(50%-0.25rem)] xl:w-[calc(33.333%-0.34rem)]">
+          <div key={assignment.id} className="w-full min-w-0 lg:w-[calc(50%-0.25rem)] 2xl:w-[calc(33.333%-0.34rem)]">
             <AssignmentCard
               assignment={assignment}
               meal={mealsById.get(assignment.mealId)}
@@ -410,8 +410,11 @@ export function WeekPlanView() {
           </div>
         )}
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[1fr_19rem] xl:grid-cols-[1fr_22rem]">
-          <div className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-1">
+        {/* md = 768 px: das iPad im Hochformat (834 px) bekommt bereits die
+            Zweiteilung Plan | Pool. min-w-0 verhindert, dass lange Namen die
+            Spalten aufblaehen und die Seite waagerecht ueberlaufen laesst. */}
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-y-auto md:grid-cols-[1fr_16.5rem] md:overflow-hidden lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_22rem] xl:gap-3">
+          <div className="flex min-w-0 flex-col gap-1.5 md:min-h-0 md:overflow-y-auto md:pr-1">
             {!ready && <p className="p-4 text-[color:var(--color-muted)]">Daten werden geladen…</p>}
             {dates.map((date, index) => (
               <DayRow

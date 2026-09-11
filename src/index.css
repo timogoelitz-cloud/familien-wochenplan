@@ -22,7 +22,14 @@
   --color-leaf: #5b8c3e;
   --color-sun: #d99a1f;
 
-  --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /*
+   * Bewusst nur Systemschriften: keine externe Abhaengigkeit, nichts nachzuladen,
+   * funktioniert offline. Auf iPad und Mac greift "ui-rounded" (SF Pro Rounded)
+   * und liefert genau die freundliche, runde Optik.
+   */
+  --font-sans:
+    ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable',
+    'Segoe UI', system-ui, 'Helvetica Neue', Arial, sans-serif;
 
   --radius-card: 1.1rem;
 }

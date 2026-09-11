@@ -70,7 +70,10 @@ test('Vorratsprüfung blendet vorhandene Artikel aus der Kaufliste aus', async (
   await planWeek(page);
   await goToView(page, 'Einkaufsliste');
 
+  // Erst zaehlen, wenn die Liste tatsaechlich gerendert ist.
+  await expect(page.getByRole('checkbox').first()).toBeVisible();
   const before = await page.getByRole('checkbox').count();
+  expect(before).toBeGreaterThan(0);
 
   await page.getByRole('tab', { name: '1. Vorrat prüfen' }).click();
   await page.locator('li').filter({ hasText: 'Spaghetti' }).first().getByRole('checkbox').click();
@@ -78,7 +81,7 @@ test('Vorratsprüfung blendet vorhandene Artikel aus der Kaufliste aus', async (
 
   await page.getByRole('tab', { name: '2. Einkaufen' }).click();
   await expect(page.getByRole('checkbox')).toHaveCount(before - 1);
-  await expect(page.locator('section[aria-label]')).not.toContainText('Spaghetti');
+  await expect(page.getByRole('region', { name: 'Kück Biomarkt' })).not.toContainText('Spaghetti');
   await expect(page.getByText(/1 im Vorrat/)).toBeVisible();
 
   // Zuruecksetzen bringt den Artikel wieder in die Kaufliste.

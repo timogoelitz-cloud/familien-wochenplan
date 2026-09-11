@@ -31,3 +31,4 @@ yarn-error.log*
 *.backup.json
 Wochenplan-Sicherung_*.json
 Gerichte_*.json
+*.tsbuildinfo
