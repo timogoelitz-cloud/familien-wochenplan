@@ -46,9 +46,18 @@ Du wandelst ein Rezept in strukturierte JSON-Daten für eine Familien-Essensplan
    Jeder andere Wert lässt den Import fehlschlagen. Rechne notfalls um
    („1 Esslöffel“ → `{ "amount": 1, "unit": "EL" }`).
 
-2. **Mengen** sind Zahlen, kein Text. Also `500`, nicht `"500 g"` und nicht `"ca. 500"`.
-   Dezimaltrennzeichen ist der Punkt. Bereichsangaben („2–3 Zwiebeln“) auf einen Wert festlegen
-   und im `note`-Feld vermerken.
+2. **Mengen** kennen drei Formen – wähle die passende, erfinde nichts:
+   - feste Menge: `"amount": 500`
+   - Bereich: `"amount": { "min": 700, "max": 800 }` (auch `"700-800"` wird verstanden)
+   - unbeziffert: `"amount": null` – für „etwas Öl“, „Kräuter und Gewürze“, „Wasser“.
+     **Niemals eine Zahl erfinden**, wenn das Rezept keine nennt.
+   Dezimaltrennzeichen ist der Punkt.
+
+   Zutaten, die man nicht je Gericht einkauft (Öl, Salz, Gewürze, Butter zum Braten),
+   zusätzlich mit `"pantryStaple": true` kennzeichnen. Sie werden dann nur zur
+   Bestandsprüfung angezeigt und nie aufsummiert.
+
+   Optionale Zutaten („Optional: geriebener Käse“) mit `"optional": true` kennzeichnen.
 
 3. **Mengen beziehen sich auf `servings`.** Standard sind 4 Personen (Timo, Sandra, Mika, Thore).
    Steht im Rezept eine andere Portionszahl, rechne auf 4 Portionen hoch und setze `"servings": 4`.
@@ -80,12 +89,48 @@ Anschließend folgt das Rezept, z. B.:
 
 > Lasagne. Hier ist das Rezept: …
 
+### Alternativen und Varianten
+
+Steht im Rezept eine Wahl („Reis **oder** Kartoffeln“, „Fertigprodukt **oder** selbst gekocht“),
+lege eine Auswahlgruppe an, damit nur die gewählte Beilage auf der Einkaufsliste landet:
+
+```json
+{
+  "name": "Hähnchen mit Beilage",
+  "choiceGroups": [
+    {
+      "key": "beilage",
+      "name": "Beilage",
+      "mode": "one",
+      "options": [
+        { "key": "kartoffeln", "label": "Kartoffeln" },
+        { "key": "reis", "label": "Reis" }
+      ],
+      "default": ["kartoffeln"]
+    }
+  ],
+  "ingredients": [
+    { "name": "Kartoffeln", "amount": 1200, "unit": "g", "choiceGroup": "beilage", "choiceOption": "kartoffeln" },
+    { "name": "Reis", "amount": 400, "unit": "g", "choiceGroup": "beilage", "choiceOption": "reis" }
+  ]
+}
+```
+
+`"mode": "one"` = genau eine Option, `"mode": "any"` = mehrere gleichzeitig möglich.
+
+### Portionsbasis
+
+`"servings": 4` für die übliche Familienmenge. Nennt das Rezept keine Personenzahl und lässt sie
+sich nicht erschließen, `"servings": null` setzen – dann rechnet die App bewusst nichts hoch.
+
 ### Selbstprüfung vor der Antwort
 
 - Ist die Antwort valides JSON und nichts sonst?
 - Enthält jede Zutat `name`, `amount` (Zahl) und eine erlaubte `unit`?
 - Steht in jedem `merchant` ein Name aus der erlaubten Liste – oder gar keiner?
 - Hat jede `packageSize` dieselbe Dimension wie die Zutat selbst?
+- Sind unbezifferte Mengen wirklich `null` und nicht `0`?
+- Verweist jede Zutat mit `choiceGroup` auf eine existierende Gruppe und Option?
 
 ---
 

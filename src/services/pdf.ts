@@ -7,7 +7,7 @@
  */
 import type { jsPDF } from 'jspdf';
 import type { ShoppingList, ShoppingListItem } from '../domain/types';
-import { formatQuantity } from '../domain/units';
+import { formatQuantity, formatRange } from '../domain/units';
 import { formatDateDE } from '../domain/week';
 
 const PAGE_WIDTH = 210;
@@ -65,7 +65,8 @@ export async function createShoppingListPdf(list: ShoppingList): Promise<jsPDF> 
   doc.line(MARGIN, y, PAGE_WIDTH - MARGIN, y);
   y += 8;
 
-  const totalItems = list.groups.reduce((sum, group) => sum + group.items.length, 0);
+  const totalItems =
+    list.groups.reduce((sum, group) => sum + group.items.length, 0) + list.pantryChecks.length;
   if (totalItems === 0) {
     doc.setFontSize(12);
     doc.setTextColor(120);
@@ -111,7 +112,9 @@ export async function createShoppingListPdf(list: ShoppingList): Promise<jsPDF> 
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11.5);
-      const amountText = formatQuantity(item.amount, item.unit);
+      const amountText = item.isRange
+        ? formatRange(item.amount, item.amountUpper, item.unit)
+        : formatQuantity(item.amountUpper, item.unit);
       const amountWidth = doc.getTextWidth(amountText);
       const nameWidth = Math.max(CONTENT_WIDTH - 10 - amountWidth - 4, 30);
       const nameLines = doc.splitTextToSize(item.name, nameWidth) as string[];
@@ -135,6 +138,32 @@ export async function createShoppingListPdf(list: ShoppingList): Promise<jsPDF> 
       y += 3;
     }
     y += 5;
+  }
+
+  // Unbezifferte Zutaten: nur auffuehren, nicht summieren.
+  if (list.pantryChecks.length > 0) {
+    newPageIfNeeded(24);
+    doc.setFillColor(244, 237, 225);
+    doc.rect(MARGIN, y, CONTENT_WIDTH, 9, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12.5);
+    doc.text('BITTE NACHSEHEN', MARGIN + 3, y + 6.2);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(110);
+    doc.text('ohne feste Menge', PAGE_WIDTH - MARGIN - 3, y + 6.2, { align: 'right' });
+    doc.setTextColor(0);
+    y += 13;
+
+    doc.setFontSize(10.5);
+    const names = list.pantryChecks.map((item) => item.name).join('  ·  ');
+    const wrapped = doc.splitTextToSize(names, CONTENT_WIDTH - 4) as string[];
+    for (const row of wrapped) {
+      newPageIfNeeded(6);
+      doc.text(row, MARGIN + 2, y + 3.5);
+      y += 5.5;
+    }
+    y += 4;
   }
 
   const pageCount = doc.getNumberOfPages();

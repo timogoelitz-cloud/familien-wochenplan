@@ -1,22 +1,42 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-/** Startet die App mit leerer Datenbank, damit Tests unabhaengig voneinander sind. */
+/**
+ * Startet die App mit leerer Datenbank, damit Tests unabhaengig voneinander sind.
+ *
+ * Das Leeren laeuft ueber page.evaluate. Faellt der Ausfuehrungskontext dabei
+ * weg -- etwa weil der Dev-Server gerade neu laedt --, wird einmal erneut
+ * versucht, statt den Test an einem Zeitproblem scheitern zu lassen.
+ */
 export async function openFreshApp(page: Page): Promise<void> {
-  await page.goto('/');
-  await page.evaluate(async () => {
-    const databases = await indexedDB.databases?.();
-    await Promise.all(
-      (databases ?? []).map(
-        (entry) =>
-          new Promise<void>((resolve) => {
-            if (!entry.name) return resolve();
-            const request = indexedDB.deleteDatabase(entry.name);
-            request.onsuccess = request.onerror = request.onblocked = () => resolve();
-          }),
-      ),
-    );
-  });
+  const clearDatabases = async () => {
+    await page.evaluate(async () => {
+      const databases = await indexedDB.databases?.();
+      await Promise.all(
+        (databases ?? []).map(
+          (entry) =>
+            new Promise<void>((resolve) => {
+              if (!entry.name) return resolve();
+              const request = indexedDB.deleteDatabase(entry.name);
+              request.onsuccess = request.onerror = request.onblocked = () => resolve();
+            }),
+        ),
+      );
+    });
+  };
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    // Erst wenn die Oberflaeche steht, ist der Kontext stabil genug.
+    await page.getByRole('button', { name: 'Wochenplan' }).waitFor({ state: 'visible' });
+    try {
+      await clearDatabases();
+      break;
+    } catch (error) {
+      if (attempt === 2) throw error;
+    }
+  }
+
   await page.reload();
   await expect(page.getByRole('button', { name: 'Wochenplan' })).toBeVisible();
 }

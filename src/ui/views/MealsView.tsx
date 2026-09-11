@@ -5,12 +5,15 @@
  */
 import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import type { Meal, MealIngredient, Merchant, Unit } from '../../domain/types';
-import { UNITS } from '../../domain/types';
+import type { AmountSpec, Meal, MealIngredient, Merchant, Unit } from '../../domain/types';
+import { AMOUNT_OPEN, UNITS, exactAmount, rangeAmount } from '../../domain/types';
 import { newIngredientId, newMealId, nowISO } from '../../domain/ids';
 import { parseMealImport, serializeMeals } from '../../domain/mealSchema';
 import type { ValidationIssue } from '../../domain/mealSchema';
-import { addMeals, deleteMeal, saveMeal } from '../../data/repositories';
+import { addMeals, addMealsWithoutDuplicates, deleteMeal, saveMeal } from '../../data/repositories';
+// Unsere 17 Familiengerichte. Fest mitgebaut (rund 29 kB), damit sie auch
+// offline und ohne Dateiauswahl auf dem iPad verfuegbar sind.
+import seedMeals from '../../../data/meals.seed.json';
 import { downloadBlob } from '../../services/share';
 import { useApp, useAppData } from '../store';
 
@@ -30,7 +33,9 @@ function emptyMeal(): Meal {
 }
 
 function emptyIngredient(): MealIngredient {
-  return { id: newIngredientId(), name: '', amount: 0, unit: 'g', merchantId: null, packageSize: null };
+  // Von Hand angelegte Zutaten haben fast immer eine Zahl. "Menge offen" bleibt
+  // ueber die Auswahl erreichbar, ist aber bewusst nicht der Standard.
+  return { id: newIngredientId(), name: '', amount: exactAmount(0), unit: 'g', merchantId: null, packageSize: null };
 }
 
 /* ------------------------------ Zutatenzeile ----------------------------- */
@@ -65,19 +70,87 @@ function IngredientRow({
           />
         </label>
 
-        <label className="w-24">
-          <span className="block text-xs font-semibold text-[color:var(--color-muted)]">Menge</span>
-          <input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            aria-label={field('Menge')}
+        <label className="w-28">
+          <span className="block text-xs font-semibold text-[color:var(--color-muted)]">Art</span>
+          <select
+            aria-label={field('Mengenart')}
             className="tap w-full rounded-lg border border-[color:var(--color-line)] px-2"
-            value={Number.isFinite(ingredient.amount) ? ingredient.amount : 0}
-            onChange={(event) => onChange({ ...ingredient, amount: Number(event.target.value) })}
-          />
+            value={ingredient.amount.kind}
+            onChange={(event) => {
+              const kind = event.target.value as AmountSpec['kind'];
+              const current = ingredient.amount;
+              if (kind === 'open') return onChange({ ...ingredient, amount: AMOUNT_OPEN });
+              if (kind === 'exact') {
+                const value = current.kind === 'range' ? current.max : current.kind === 'exact' ? current.value : 0;
+                return onChange({ ...ingredient, amount: exactAmount(value) });
+              }
+              const base = current.kind === 'exact' ? current.value : current.kind === 'range' ? current.min : 0;
+              const top = current.kind === 'range' ? current.max : base;
+              return onChange({ ...ingredient, amount: rangeAmount(base, top) });
+            }}
+          >
+            <option value="exact">feste Menge</option>
+            <option value="range">Bereich</option>
+            <option value="open">Menge offen</option>
+          </select>
         </label>
+
+        {ingredient.amount.kind === 'exact' && (
+          <label className="w-24">
+            <span className="block text-xs font-semibold text-[color:var(--color-muted)]">Menge</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              aria-label={field('Menge')}
+              className="tap w-full rounded-lg border border-[color:var(--color-line)] px-2"
+              value={ingredient.amount.value}
+              onChange={(event) => onChange({ ...ingredient, amount: exactAmount(Number(event.target.value)) })}
+            />
+          </label>
+        )}
+
+        {ingredient.amount.kind === 'range' && (
+          <>
+            <label className="w-20">
+              <span className="block text-xs font-semibold text-[color:var(--color-muted)]">von</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                aria-label={field('Menge von')}
+                className="tap w-full rounded-lg border border-[color:var(--color-line)] px-2"
+                value={ingredient.amount.min}
+                onChange={(event) =>
+                  onChange({
+                    ...ingredient,
+                    amount: rangeAmount(Number(event.target.value), (ingredient.amount as { max: number }).max),
+                  })
+                }
+              />
+            </label>
+            <label className="w-20">
+              <span className="block text-xs font-semibold text-[color:var(--color-muted)]">bis</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                aria-label={field('Menge bis')}
+                className="tap w-full rounded-lg border border-[color:var(--color-line)] px-2"
+                value={ingredient.amount.max}
+                onChange={(event) =>
+                  onChange({
+                    ...ingredient,
+                    amount: rangeAmount((ingredient.amount as { min: number }).min, Number(event.target.value)),
+                  })
+                }
+              />
+            </label>
+          </>
+        )}
 
         <label className="w-28">
           <span className="block text-xs font-semibold text-[color:var(--color-muted)]">Einheit</span>
@@ -163,6 +236,24 @@ function IngredientRow({
               </option>
             ))}
           </select>
+        </label>
+        <label className="flex items-center gap-2 pb-1">
+          <input
+            type="checkbox"
+            className="h-5 w-5"
+            checked={ingredient.optional === true}
+            onChange={(event) => onChange({ ...ingredient, optional: event.target.checked || undefined })}
+          />
+          <span className="text-xs font-semibold text-[color:var(--color-muted)]">optional</span>
+        </label>
+        <label className="flex items-center gap-2 pb-1" title="Öl, Gewürze: erscheint nur zur Bestandsprüfung, wird nie aufsummiert">
+          <input
+            type="checkbox"
+            className="h-5 w-5"
+            checked={ingredient.pantryStaple === true}
+            onChange={(event) => onChange({ ...ingredient, pantryStaple: event.target.checked || undefined })}
+          />
+          <span className="text-xs font-semibold text-[color:var(--color-muted)]">Vorrat</span>
         </label>
         <label className="min-w-[8rem] flex-1">
           <span className="block text-xs font-semibold text-[color:var(--color-muted)]">Warengruppe (optional)</span>
@@ -418,6 +509,26 @@ export function MealsView() {
     notify(`${result.value.length} Gericht(e) importiert.`, 'success');
   };
 
+  /** Laedt unsere 17 Familiengerichte, ohne vorhandene doppelt anzulegen. */
+  const handleLoadSeed = async () => {
+    setIssues(null);
+    const result = parseMealImport(seedMeals, (name) => merchantByName.get(name.toLowerCase().trim()) ?? null);
+    if (!result.ok) {
+      setIssues({ errors: result.errors, warnings: result.warnings });
+      notify('Die Gerichte konnten nicht geladen werden.', 'error');
+      return;
+    }
+    const { added, skipped } = await addMealsWithoutDuplicates(result.value);
+    if (added.length === 0) {
+      notify('Alle 17 Gerichte sind bereits vorhanden.', 'info');
+    } else {
+      notify(
+        `${added.length} Gericht(e) geladen${skipped.length > 0 ? `, ${skipped.length} waren schon da` : ''}.`,
+        'success',
+      );
+    }
+  };
+
   /**
    * Laedt die mitgelieferten Demo-Gerichte. Sie sind als `demo: true` markiert
    * und tragen "DEMO" im Namen -- sie duerfen nie mit den 17 echten
@@ -470,6 +581,14 @@ export function MealsView() {
           </button>
           <button type="button" onClick={handleExport} disabled={meals.length === 0} className="tap rounded-xl border border-[color:var(--color-line)] bg-white px-4 font-semibold disabled:opacity-40">
             Exportieren
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleLoadSeed()}
+            data-testid="load-seed"
+            className="tap rounded-xl border border-[color:var(--color-line)] bg-white px-4 font-semibold"
+          >
+            Unsere 17 Gerichte
           </button>
           <button type="button" onClick={() => setEditing(emptyMeal())} className="tap rounded-xl bg-[color:var(--color-terracotta)] px-5 font-semibold text-white">
             + Neues Gericht
@@ -528,14 +647,23 @@ export function MealsView() {
               <code>data/meals.example.json</code>. Unsere 17 echten Gerichte gehören in{' '}
               <code>data/meals.seed.json</code>.
             </p>
-            <button
-              type="button"
-              onClick={() => void handleLoadDemo()}
-              data-testid="load-demo"
-              className="tap mt-4 rounded-xl border border-[color:var(--color-line)] px-5 font-semibold"
-            >
-              Demo-Gerichte laden (nur zum Ausprobieren)
-            </button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void handleLoadSeed()}
+                className="tap rounded-xl bg-[color:var(--color-terracotta)] px-5 font-semibold text-white"
+              >
+                Unsere 17 Gerichte laden
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleLoadDemo()}
+                data-testid="load-demo"
+                className="tap rounded-xl border border-[color:var(--color-line)] px-5 font-semibold"
+              >
+                Demo-Gerichte laden
+              </button>
+            </div>
           </div>
         )}
 
@@ -551,7 +679,10 @@ export function MealsView() {
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-bold">{meal.name}</h2>
+                  <h2 className="font-bold">
+                    {meal.number ? <span className="opacity-60">{meal.number}. </span> : null}
+                    {meal.name}
+                  </h2>
                   {meal.demo && (
                     <span className="mt-1 inline-block rounded-full bg-[color:var(--color-parchment)] px-2 py-0.5 text-xs font-bold">
                       DEMO

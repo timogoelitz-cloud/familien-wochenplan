@@ -97,3 +97,23 @@ export function formatQuantity(amount: number, unit: Unit): string {
   if (unit === 'nach Bedarf') return 'nach Bedarf';
   return `${formatNumberDE(amount)} ${unit}`;
 }
+
+/**
+ * Menge als Bereich: "700-800 ml". Bei gleichen Grenzen wird nur ein Wert
+ * ausgegeben, damit aus "500-500 g" nicht unnoetig ein Bereich wird.
+ */
+export function formatRange(min: number, max: number, unit: Unit): string {
+  if (unit === 'nach Bedarf') return 'nach Bedarf';
+  if (roundTo(min, 3) === roundTo(max, 3)) return formatQuantity(max, unit);
+  return `${formatNumberDE(min)}–${formatNumberDE(max)} ${unit}`;
+}
+
+/** Formatiert eine Mengenangabe samt Einheit, inklusive Bereichen und "offen". */
+export function formatAmountSpec(
+  spec: { kind: 'exact'; value: number } | { kind: 'range'; min: number; max: number } | { kind: 'open' },
+  unit: Unit,
+): string {
+  if (spec.kind === 'open') return 'Menge offen';
+  if (spec.kind === 'range') return formatRange(spec.min, spec.max, unit);
+  return formatQuantity(spec.value, unit);
+}

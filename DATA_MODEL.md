@@ -48,7 +48,57 @@ Zutaten als eingebettetes Array. Eingebettet statt eigene Tabelle, weil Zutaten 
 Gericht bearbeitet werden – ein Gericht ist die natürliche Einheit beim Laden, Speichern, Exportieren.
 
 Eine `MealIngredient` hat `name`, `amount`, `unit`, `merchantId`, optional `packageSize`,
-`category` und `note`.
+`category`, `note`, `optional`, `pantryStaple` und eine Zuordnung zu einer Auswahlgruppe.
+
+### Mengen: `AmountSpec`
+
+Eine Menge ist bewusst **keine blanke Zahl**, sondern einer von drei Fällen:
+
+```ts
+type AmountSpec =
+  | { kind: 'exact'; value: number }      // "500 g Nudeln"
+  | { kind: 'range'; min: number; max: number }  // "700–800 ml"
+  | { kind: 'open' };                     // "Etwas Öl", "Kräuter und Gewürze"
+```
+
+`range` wird nie auf einen Wert zusammengestaucht: Unter- und Obergrenzen werden getrennt addiert,
+sodass aus zweimal „700–800 ml“ korrekt „1,4–1,6 l“ wird. Eingekauft wird nach der **Obergrenze** –
+lieber etwas übrig als zu wenig; auch die Packungsrechnung nutzt sie.
+
+`open` steht für bewusst unbezifferte Zutaten. Sie werden **nie** aufsummiert, sondern erscheinen
+als eigener Block „Bitte nachsehen“. Dasselbe gilt für Zutaten mit `pantryStaple: true` (Öl, Salz,
+Gewürze) – man kauft kein Salz je Gericht.
+
+### Auswahlgruppen: `MealChoiceGroup`
+
+Bildet „Reis **oder** Kartoffeln“, „Fertigprodukt **oder** selbst gekocht“ und Ähnliches ab.
+
+```ts
+interface MealChoiceGroup {
+  id: ID;
+  name: string;                  // "Beilage"
+  mode: 'one' | 'any';           // genau eine / beliebig viele
+  options: Array<{ id: ID; label: string }>;
+  defaultOptionIds: ID[];        // Vorauswahl beim Zuordnen
+}
+```
+
+Eine Zutat verweist über `choiceGroupId` und `choiceOptionId` auf eine Option. Sie kommt nur auf
+die Einkaufsliste, wenn ihre Option für diese Zuordnung gewählt ist. Die getroffene Auswahl liegt
+**an der Zuordnung**, nicht am Gericht (`MealAssignment.choices`) – dasselbe Gericht kann am
+Montag mit Reis und am Freitag mit Kartoffeln geplant sein.
+
+### Portionsbasis
+
+`Meal.servings` ist die Personenzahl, auf die sich die Mengen beziehen. `null` heißt ausdrücklich
+**„nicht beziffert“** – bei den Gerichten 14 und 15 war die Basis in unserer Liste nie angegeben,
+und sie wird deshalb nie automatisch hochgerechnet. Gericht 11 nennt seine Fleischmenge
+ausdrücklich für drei Personen; das steht in der Notiz der Zutat.
+
+### Feste Gerichtnummer
+
+`Meal.number` trägt die Nummer 1–17 aus unserer Liste. Sie bleibt erhalten, auch wenn ein Gericht
+umbenannt wird, und dient beim erneuten Laden dazu, Duplikate zu erkennen.
 
 `packageSize` ist eine eigene `Quantity` (Menge + Einheit), nicht nur eine Zahl: Eine Zutat kann in
 `kg` geführt sein, während die Packung in `g` angegeben ist. Die Packungsrechnung verlangt lediglich,

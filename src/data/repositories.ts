@@ -103,6 +103,40 @@ export async function addMeals(meals: Meal[]): Promise<void> {
   await db.meals.bulkPut(meals);
 }
 
+/**
+ * Fuegt Gerichte hinzu und laesst dabei aus, was schon da ist.
+ *
+ * Erkennungsmerkmal ist die feste Gerichtnummer (1-17), ersatzweise der Name.
+ * So laesst sich der Knopf "Unsere 17 Gerichte laden" gefahrlos zweimal
+ * druecken, ohne dass alles doppelt in der Liste steht.
+ */
+export async function addMealsWithoutDuplicates(
+  meals: Meal[],
+): Promise<{ added: Meal[]; skipped: Meal[] }> {
+  const existing = await db.meals.toArray();
+  const numbers = new Set(
+    existing.map((meal) => meal.number).filter((n): n is number => typeof n === 'number'),
+  );
+  const names = new Set(existing.map((meal) => meal.name.trim().toLowerCase()));
+
+  const added: Meal[] = [];
+  const skipped: Meal[] = [];
+  for (const meal of meals) {
+    const duplicate =
+      (typeof meal.number === 'number' && numbers.has(meal.number)) ||
+      names.has(meal.name.trim().toLowerCase());
+    if (duplicate) {
+      skipped.push(meal);
+      continue;
+    }
+    added.push(meal);
+    if (typeof meal.number === 'number') numbers.add(meal.number);
+    names.add(meal.name.trim().toLowerCase());
+  }
+  if (added.length > 0) await db.meals.bulkPut(added);
+  return { added, skipped };
+}
+
 /** Loescht ein Gericht samt aller Zuordnungen in allen Wochen. */
 export async function deleteMeal(id: ID): Promise<void> {
   await db.transaction('rw', db.meals, db.assignments, async () => {
@@ -197,6 +231,32 @@ export async function moveAssignment(id: ID, targetDate: string, targetWeekId: W
       updatedAt: nowISO(),
     });
   });
+}
+
+/** Setzt die Auswahl einer Auswahlgruppe (Beilage, Variante ...). */
+export async function setChoice(
+  assignmentId: ID,
+  groupId: ID,
+  optionIds: ID[],
+): Promise<void> {
+  const existing = await db.assignments.get(assignmentId);
+  if (!existing) return;
+  await db.assignments.put({
+    ...existing,
+    choices: { ...(existing.choices ?? {}), [groupId]: optionIds },
+    updatedAt: nowISO(),
+  });
+}
+
+/** Schaltet eine optionale Zutat fuer diese Zuordnung an oder aus. */
+export async function toggleOptionalIngredient(assignmentId: ID, ingredientId: ID): Promise<void> {
+  const existing = await db.assignments.get(assignmentId);
+  if (!existing) return;
+  const current = existing.optionalIngredientIds ?? [];
+  const next = current.includes(ingredientId)
+    ? current.filter((id) => id !== ingredientId)
+    : [...current, ingredientId];
+  await db.assignments.put({ ...existing, optionalIngredientIds: next, updatedAt: nowISO() });
 }
 
 export async function togglePerson(assignmentId: ID, personId: ID): Promise<void> {

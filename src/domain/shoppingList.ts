@@ -7,6 +7,7 @@ import type {
   ID,
   Meal,
   MealAssignment,
+  MealIngredient,
   Merchant,
   ShoppingGroup,
   ShoppingLineState,
@@ -21,6 +22,41 @@ export const UNKNOWN_MERCHANT_LABEL = 'Unklar';
 
 const DEFAULT_STATE: ShoppingLineState = { inPantry: false, checked: false };
 
+/**
+ * Welche Optionen gelten fuer diese Zuordnung? Ohne eigene Auswahl greift die
+ * Vorauswahl des Gerichts.
+ */
+export function effectiveChoices(meal: Meal, assignment: MealAssignment): Record<ID, ID[]> {
+  const result: Record<ID, ID[]> = {};
+  for (const group of meal.choiceGroups ?? []) {
+    const chosen = assignment.choices?.[group.id];
+    result[group.id] = chosen ?? group.defaultOptionIds;
+  }
+  return result;
+}
+
+/**
+ * Entscheidet, ob eine Zutat fuer diese Zuordnung eingekauft werden muss.
+ *
+ * Zwei Faelle schliessen sie aus:
+ *  - Sie ist optional und wurde nicht dazugewaehlt.
+ *  - Sie gehoert zu einer Auswahlgruppe, deren Option nicht gewaehlt ist.
+ *    So landet bei "Reis oder Kartoffeln" nur die gewaehlte Beilage auf der Liste.
+ */
+export function isIngredientSelected(
+  ingredient: MealIngredient,
+  choices: Record<ID, ID[]>,
+  optionalIds: ID[],
+): boolean {
+  if (ingredient.optional && !optionalIds.includes(ingredient.id)) return false;
+  if (ingredient.choiceGroupId) {
+    const selected = choices[ingredient.choiceGroupId] ?? [];
+    if (!ingredient.choiceOptionId) return false;
+    if (!selected.includes(ingredient.choiceOptionId)) return false;
+  }
+  return true;
+}
+
 /** Wandelt die Gerichte einer Woche in flache Bedarfszeilen um. */
 export function buildDemandLines(
   assignments: MealAssignment[],
@@ -33,7 +69,11 @@ export function buildDemandLines(
   for (const assignment of sorted) {
     const meal = mealsById.get(assignment.mealId);
     if (!meal) continue; // Gericht wurde geloescht -- Zuordnung stillschweigend ueberspringen.
+    const choices = effectiveChoices(meal, assignment);
+    const optionalIds = assignment.optionalIngredientIds ?? [];
+
     for (const ingredient of meal.ingredients) {
+      if (!isIngredientSelected(ingredient, choices, optionalIds)) continue;
       const line: DemandLine = {
         ingredientName: ingredient.name,
         amount: ingredient.amount,
@@ -41,10 +81,11 @@ export function buildDemandLines(
         merchantId: ingredient.merchantId ?? null,
         packageSize: ingredient.packageSize ?? null,
         mealId: meal.id,
-        mealName: meal.name,
+        mealName: meal.number ? `${meal.number}. ${meal.name}` : meal.name,
         date: assignment.date,
       };
       if (ingredient.category) line.category = ingredient.category;
+      if (ingredient.pantryStaple) line.pantryStaple = true;
       lines.push(line);
     }
   }
@@ -107,10 +148,13 @@ export function buildShoppingList(options: BuildShoppingListOptions): ShoppingLi
   const mealsById = new Map(meals.map((meal) => [meal.id, meal]));
   const aggregated = aggregateDemand(buildDemandLines(assignments, mealsById));
 
-  const allItems: ShoppingListItem[] = aggregated.map((item) => ({
+  const withState = (item: Omit<ShoppingListItem, 'state'>): ShoppingListItem => ({
     ...item,
     state: lineStates[item.key] ?? DEFAULT_STATE,
-  }));
+  });
+
+  const allItems: ShoppingListItem[] = aggregated.items.map(withState);
+  const pantryChecks: ShoppingListItem[] = aggregated.pantryChecks.map(withState);
 
   const visible = hidePantryItems ? allItems.filter((item) => !item.state.inPantry) : allItems;
 
@@ -122,6 +166,7 @@ export function buildShoppingList(options: BuildShoppingListOptions): ShoppingLi
     endDate: end,
     groups: groupByMerchant(visible, merchants),
     allItems,
+    pantryChecks: pantryChecks.sort((a, b) => a.name.localeCompare(b.name, 'de-DE')),
   };
 }
 

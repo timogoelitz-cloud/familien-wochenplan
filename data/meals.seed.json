@@ -2,18 +2,1242 @@
   "format": "familien-wochenplan/meals",
   "version": 1,
   "_hinweis": [
-    "HIER KOMMEN UNSERE 17 ECHTEN FAMILIENGERICHTE HINEIN.",
-    "Diese Datei ist absichtlich leer: Rezepte, Mengen und Händlerzuordnungen",
-    "wurden NICHT geraten oder rekonstruiert.",
-    "",
-    "So wird sie befüllt:",
-    "1. Jedes Gericht als Objekt in \"meals\" eintragen (Format siehe meal.schema.json,",
-    "   ausgefülltes Beispiel siehe meals.example.json).",
-    "2. In der App auf \"Gerichte\" -> \"Importieren\" gehen und diese Datei auswählen.",
-    "3. Die App prüft alles vorab. Bei einem Fehler wird NICHTS importiert und",
-    "   genau angezeigt, welche Zeile das Problem verursacht.",
-    "",
-    "Der Schlüssel \"_hinweis\" wird beim Import ignoriert."
+    "Unsere 17 Familiengerichte. Mengen sind Planungsrichtwerte fuer vier Personen,",
+    "sofern beim Gericht nichts anderes steht (siehe servings).",
+    "servings: null bedeutet: Portionsbasis bewusst nicht beziffert.",
+    "amount: null bedeutet \"Menge offen\" - bewusst keine erfundene Zahl.",
+    "pantryStaple: Oel, Gewuerze und Aehnliches - wird nie aufsummiert."
   ],
-  "meals": []
+  "meals": [
+    {
+      "number": 1,
+      "name": "Nudeln mit Tomatensauce",
+      "servings": 4,
+      "cookingTime": "ca. 20 Minuten",
+      "description": "Für Thore bei Bedarf Dinkelnudeln verwenden.",
+      "choiceGroups": [
+        {
+          "key": "nudelart",
+          "name": "Nudelart",
+          "mode": "one",
+          "default": [
+            "normal"
+          ],
+          "options": [
+            {
+              "key": "normal",
+              "label": "Normale Nudeln"
+            },
+            {
+              "key": "dinkel",
+              "label": "Dinkelnudeln (Thore)"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Nudeln",
+          "amount": 500,
+          "unit": "g",
+          "choiceGroup": "nudelart",
+          "choiceOption": "normal"
+        },
+        {
+          "name": "Dinkelnudeln",
+          "amount": 500,
+          "unit": "g",
+          "choiceGroup": "nudelart",
+          "choiceOption": "dinkel"
+        },
+        {
+          "name": "Passierte Tomaten",
+          "amount": {
+            "min": 700,
+            "max": 800
+          },
+          "unit": "ml"
+        },
+        {
+          "name": "Zwiebeln",
+          "amount": 1,
+          "unit": "Stk"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Kräuter und Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Geriebener Käse",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Gemüse-Nudeln",
+      "servings": 4,
+      "cookingTime": "ca. 25–30 Minuten",
+      "description": "Die Gemüseauswahl bleibt bearbeitbar.",
+      "ingredients": [
+        {
+          "name": "Nudeln",
+          "amount": 500,
+          "unit": "g"
+        },
+        {
+          "name": "Gemischtes Gemüse",
+          "amount": 800,
+          "unit": "g",
+          "note": "Auswahl frei anpassbar"
+        },
+        {
+          "name": "Tomatensauce",
+          "amount": {
+            "min": 500,
+            "max": 700
+          },
+          "unit": "ml",
+          "note": "oder die gewohnte Sauce"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Käse",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Selbstgemachte Pizza",
+      "servings": 4,
+      "cookingTime": "ca. 60 Minuten; mit Fertigteig ca. 30–35 Minuten",
+      "description": "Unterschiedliche Beläge je Familienmitglied möglich.",
+      "choiceGroups": [
+        {
+          "key": "teig",
+          "name": "Teig",
+          "mode": "one",
+          "default": [
+            "selbst"
+          ],
+          "options": [
+            {
+              "key": "selbst",
+              "label": "Selbst gemacht"
+            },
+            {
+              "key": "fertig",
+              "label": "Fertigteig"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Mehl",
+          "amount": 500,
+          "unit": "g",
+          "choiceGroup": "teig",
+          "choiceOption": "selbst"
+        },
+        {
+          "name": "Hefe",
+          "amount": 1,
+          "unit": "Pck",
+          "choiceGroup": "teig",
+          "choiceOption": "selbst"
+        },
+        {
+          "name": "Wasser",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "choiceGroup": "teig",
+          "choiceOption": "selbst",
+          "pantryStaple": true
+        },
+        {
+          "name": "Pizzateig (fertig)",
+          "amount": null,
+          "unit": "Pck",
+          "choiceGroup": "teig",
+          "choiceOption": "fertig"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Tomatensauce",
+          "amount": {
+            "min": 400,
+            "max": 500
+          },
+          "unit": "ml"
+        },
+        {
+          "name": "Käse",
+          "amount": {
+            "min": 300,
+            "max": 400
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Gemüse und Beläge",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "note": "Nach Wunsch je Person"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Kartoffelpüree mit Gemüse und Spiegelei",
+      "servings": 4,
+      "cookingTime": "ca. 35–40 Minuten",
+      "ingredients": [
+        {
+          "name": "Kartoffeln",
+          "amount": {
+            "min": 1200,
+            "max": 1500
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Milch",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "note": "oder die gewohnte Alternative"
+        },
+        {
+          "name": "Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Eier",
+          "amount": {
+            "min": 4,
+            "max": 6
+          },
+          "unit": "Stk"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 700,
+            "max": 900
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Salz",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Muskat",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Fisch mit Kartoffeln und Gemüse",
+      "servings": 4,
+      "cookingTime": "ca. 35–40 Minuten",
+      "ingredients": [
+        {
+          "name": "Fischfilet",
+          "amount": {
+            "min": 600,
+            "max": 800
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": 1200,
+          "unit": "g"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 700,
+            "max": 900
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl oder Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Zitrone",
+          "amount": null,
+          "unit": "Stk",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "Kartoffel- oder Süßkartoffelgericht mit Gemüse",
+      "servings": 4,
+      "cookingTime": "ca. 35–45 Minuten",
+      "description": "Varianten: Ofengericht, Pfannengericht oder gekochte Variante.",
+      "choiceGroups": [
+        {
+          "key": "knolle",
+          "name": "Grundzutat",
+          "mode": "one",
+          "default": [
+            "kartoffel"
+          ],
+          "options": [
+            {
+              "key": "kartoffel",
+              "label": "Kartoffeln"
+            },
+            {
+              "key": "suess",
+              "label": "Süßkartoffeln"
+            }
+          ]
+        },
+        {
+          "key": "zubereitung",
+          "name": "Zubereitung",
+          "mode": "one",
+          "default": [
+            "ofen"
+          ],
+          "options": [
+            {
+              "key": "ofen",
+              "label": "Ofengericht"
+            },
+            {
+              "key": "pfanne",
+              "label": "Pfannengericht"
+            },
+            {
+              "key": "gekocht",
+              "label": "Gekocht"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Kartoffeln",
+          "amount": {
+            "min": 1200,
+            "max": 1500
+          },
+          "unit": "g",
+          "choiceGroup": "knolle",
+          "choiceOption": "kartoffel"
+        },
+        {
+          "name": "Süßkartoffeln",
+          "amount": {
+            "min": 1200,
+            "max": 1500
+          },
+          "unit": "g",
+          "choiceGroup": "knolle",
+          "choiceOption": "suess"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 800,
+            "max": 1000
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Eier",
+          "amount": null,
+          "unit": "Stk",
+          "optional": true
+        },
+        {
+          "name": "Käse",
+          "amount": null,
+          "unit": "g",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "name": "Salat mit Käse und/oder Fisch",
+      "servings": 4,
+      "cookingTime": "ca. 15 Minuten mit Käse, ca. 25–30 Minuten mit frisch gegartem Fisch",
+      "choiceGroups": [
+        {
+          "key": "eiweiss",
+          "name": "Einlage",
+          "mode": "any",
+          "default": [
+            "kaese"
+          ],
+          "options": [
+            {
+              "key": "kaese",
+              "label": "Käse"
+            },
+            {
+              "key": "fisch",
+              "label": "Fisch"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Salat",
+          "amount": {
+            "min": 1,
+            "max": 2
+          },
+          "unit": "Stk",
+          "note": "Salate oder Salatmischungen"
+        },
+        {
+          "name": "Gurke",
+          "amount": null,
+          "unit": "Stk"
+        },
+        {
+          "name": "Tomaten",
+          "amount": null,
+          "unit": "g"
+        },
+        {
+          "name": "Paprika",
+          "amount": null,
+          "unit": "Stk"
+        },
+        {
+          "name": "Käse",
+          "amount": {
+            "min": 200,
+            "max": 300
+          },
+          "unit": "g",
+          "choiceGroup": "eiweiss",
+          "choiceOption": "kaese"
+        },
+        {
+          "name": "Fisch",
+          "amount": {
+            "min": 400,
+            "max": 600
+          },
+          "unit": "g",
+          "choiceGroup": "eiweiss",
+          "choiceOption": "fisch"
+        },
+        {
+          "name": "Dressing-Zutaten",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Brot",
+          "amount": null,
+          "unit": "Stk",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "name": "Eiergericht",
+      "servings": 4,
+      "cookingTime": "ca. 15–25 Minuten",
+      "description": "Varianten: Rührei, Omelett oder Spiegelei mit Beilage.",
+      "choiceGroups": [
+        {
+          "key": "beilage",
+          "name": "Beilage",
+          "mode": "one",
+          "default": [
+            "brot"
+          ],
+          "options": [
+            {
+              "key": "brot",
+              "label": "Brot"
+            },
+            {
+              "key": "kartoffeln",
+              "label": "Kartoffeln"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Eier",
+          "amount": {
+            "min": 8,
+            "max": 10
+          },
+          "unit": "Stk"
+        },
+        {
+          "name": "Milch",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "optional": true,
+          "note": "oder Alternative"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 500,
+            "max": 700
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Käse",
+          "amount": null,
+          "unit": "g",
+          "optional": true
+        },
+        {
+          "name": "Brot",
+          "amount": null,
+          "unit": "Stk",
+          "choiceGroup": "beilage",
+          "choiceOption": "brot"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": null,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "kartoffeln"
+        },
+        {
+          "name": "Öl oder Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "name": "Nudeln mit Bolognese / Hackfleischgericht",
+      "servings": 4,
+      "cookingTime": "ca. 30–40 Minuten",
+      "description": "Sandra nicht automatisch der Fleischvariante zuordnen.",
+      "choiceGroups": [
+        {
+          "key": "variante",
+          "name": "Variante",
+          "mode": "one",
+          "default": [
+            "fleisch"
+          ],
+          "options": [
+            {
+              "key": "fleisch",
+              "label": "Mit Hackfleisch"
+            },
+            {
+              "key": "ohne",
+              "label": "Ohne Hackfleisch"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Nudeln",
+          "amount": 500,
+          "unit": "g"
+        },
+        {
+          "name": "Rinderhack",
+          "amount": {
+            "min": 500,
+            "max": 600
+          },
+          "unit": "g",
+          "choiceGroup": "variante",
+          "choiceOption": "fleisch"
+        },
+        {
+          "name": "Passierte Tomaten",
+          "amount": {
+            "min": 700,
+            "max": 800
+          },
+          "unit": "ml"
+        },
+        {
+          "name": "Zwiebeln",
+          "amount": 1,
+          "unit": "Stk"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Kräuter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Tomatenmark",
+          "amount": null,
+          "unit": "g",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "name": "Hähnchen mit Kartoffeln oder Reis und Gemüse",
+      "servings": 4,
+      "cookingTime": "ca. 35–45 Minuten",
+      "description": "Eiweißkomponente pro Person austauschbar; Beilagen gemeinsam planbar.",
+      "choiceGroups": [
+        {
+          "key": "beilage",
+          "name": "Beilage",
+          "mode": "one",
+          "default": [
+            "kartoffeln"
+          ],
+          "options": [
+            {
+              "key": "kartoffeln",
+              "label": "Kartoffeln"
+            },
+            {
+              "key": "reis",
+              "label": "Reis"
+            }
+          ]
+        },
+        {
+          "key": "eiweiss",
+          "name": "Eiweiß",
+          "mode": "any",
+          "default": [
+            "haehnchen"
+          ],
+          "options": [
+            {
+              "key": "haehnchen",
+              "label": "Hähnchen"
+            },
+            {
+              "key": "ei",
+              "label": "Ei (für Sandra)"
+            },
+            {
+              "key": "kaese",
+              "label": "Käse (für Sandra)"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Hähnchen",
+          "amount": {
+            "min": 500,
+            "max": 700
+          },
+          "unit": "g",
+          "choiceGroup": "eiweiss",
+          "choiceOption": "haehnchen"
+        },
+        {
+          "name": "Eier",
+          "amount": null,
+          "unit": "Stk",
+          "choiceGroup": "eiweiss",
+          "choiceOption": "ei"
+        },
+        {
+          "name": "Käse",
+          "amount": null,
+          "unit": "g",
+          "choiceGroup": "eiweiss",
+          "choiceOption": "kaese"
+        },
+        {
+          "name": "Reis",
+          "amount": {
+            "min": 400,
+            "max": 500
+          },
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "reis"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": 1200,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "kartoffeln"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 800,
+            "max": 1000
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "name": "Rindfleisch / Steak mit Beilage",
+      "servings": 4,
+      "cookingTime": "ca. 30–40 Minuten",
+      "description": "Die Fleischmenge bezieht sich ausdrücklich auf drei Personen (Timo, Sandra, Mika). Alternative für Thore ist noch offen und muss von Hand ergänzt werden.",
+      "choiceGroups": [
+        {
+          "key": "beilage",
+          "name": "Beilage",
+          "mode": "one",
+          "default": [
+            "kartoffeln"
+          ],
+          "options": [
+            {
+              "key": "kartoffeln",
+              "label": "Kartoffeln"
+            },
+            {
+              "key": "andere",
+              "label": "Andere Beilage"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Rindfleisch oder Steak",
+          "amount": {
+            "min": 600,
+            "max": 750
+          },
+          "unit": "g",
+          "note": "Menge gilt für drei Personen: Timo, Sandra, Mika"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": 1200,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "kartoffeln"
+        },
+        {
+          "name": "Andere Beilage",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "choiceGroup": "beilage",
+          "choiceOption": "andere"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 700,
+            "max": 900
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl oder Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Alternative für Thore",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "note": "Noch auszuwählen – bewusst nicht festgelegt"
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "name": "Fischstäbchen mit Beilage",
+      "servings": 4,
+      "cookingTime": "ca. 25–35 Minuten",
+      "description": "Schwerpunkt Thore und Timo; die Beilagen können für alle vorbereitet werden.",
+      "choiceGroups": [
+        {
+          "key": "beilage",
+          "name": "Beilage",
+          "mode": "one",
+          "default": [
+            "kartoffeln"
+          ],
+          "options": [
+            {
+              "key": "kartoffeln",
+              "label": "Kartoffeln"
+            },
+            {
+              "key": "reis",
+              "label": "Reis"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Fischstäbchen",
+          "amount": {
+            "min": 1,
+            "max": 2
+          },
+          "unit": "Pck",
+          "note": "Je nach Packungsgröße und Appetit"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": 1200,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "kartoffeln"
+        },
+        {
+          "name": "Reis",
+          "amount": 400,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "reis"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 700,
+            "max": 900
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl oder Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "name": "Asiatische Band- oder Bratnudeln",
+      "servings": 2,
+      "cookingTime": "ca. 20–25 Minuten",
+      "description": "Portionsbasis ausdrücklich 1–2 Personen. Hauptsächlich für Thore; Timo isst bei Bedarf mit.",
+      "ingredients": [
+        {
+          "name": "Asiatische Band- oder Bratnudeln",
+          "amount": {
+            "min": 250,
+            "max": 300
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 300,
+            "max": 500
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Sojasauce",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true,
+          "note": "oder die gewohnte Würzsauce"
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "name": "Nasi Goreng",
+      "servings": null,
+      "cookingTime": "Fertigprodukt ca. 10–15 Minuten; selbst gekocht ca. 25–30 Minuten",
+      "description": "Hauptsächlich für Thore. Portionsbasis ist nicht beziffert – nicht automatisch auf vier Personen hochrechnen.",
+      "choiceGroups": [
+        {
+          "key": "variante",
+          "name": "Variante",
+          "mode": "one",
+          "default": [
+            "fertig"
+          ],
+          "options": [
+            {
+              "key": "fertig",
+              "label": "A – Fertigprodukt"
+            },
+            {
+              "key": "selbst",
+              "label": "B – Selbst gekocht"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Nasi Goreng (Fertigprodukt)",
+          "amount": 1,
+          "unit": "Pck",
+          "choiceGroup": "variante",
+          "choiceOption": "fertig"
+        },
+        {
+          "name": "Reis (trocken)",
+          "amount": {
+            "min": 125,
+            "max": 150
+          },
+          "unit": "g",
+          "choiceGroup": "variante",
+          "choiceOption": "selbst"
+        },
+        {
+          "name": "Gemüse",
+          "amount": {
+            "min": 250,
+            "max": 350
+          },
+          "unit": "g",
+          "choiceGroup": "variante",
+          "choiceOption": "selbst"
+        },
+        {
+          "name": "Eier",
+          "amount": {
+            "min": 1,
+            "max": 2
+          },
+          "unit": "Stk",
+          "choiceGroup": "variante",
+          "choiceOption": "selbst"
+        },
+        {
+          "name": "Öl",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "choiceGroup": "variante",
+          "choiceOption": "selbst",
+          "pantryStaple": true
+        },
+        {
+          "name": "Sojasauce",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "choiceGroup": "variante",
+          "choiceOption": "selbst",
+          "pantryStaple": true
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "name": "Gemüse-Pilzpfanne",
+      "servings": null,
+      "cookingTime": "ca. 25–30 Minuten",
+      "description": "Vor allem für Thore und Timo. Portionsbasis ist nicht beziffert – vor automatischer Skalierung bitte prüfen.",
+      "choiceGroups": [
+        {
+          "key": "beilage",
+          "name": "Beilage",
+          "mode": "any",
+          "default": [],
+          "options": [
+            {
+              "key": "reis",
+              "label": "Reis"
+            },
+            {
+              "key": "kartoffeln",
+              "label": "Kartoffeln"
+            },
+            {
+              "key": "sauce",
+              "label": "Gewohnte Sauce"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Pilze",
+          "amount": 500,
+          "unit": "g"
+        },
+        {
+          "name": "Gemischtes Gemüse",
+          "amount": {
+            "min": 500,
+            "max": 700
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Öl oder Butter",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gewürze",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Reis",
+          "amount": null,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "reis"
+        },
+        {
+          "name": "Kartoffeln",
+          "amount": null,
+          "unit": "g",
+          "choiceGroup": "beilage",
+          "choiceOption": "kartoffeln"
+        },
+        {
+          "name": "Sauce",
+          "amount": null,
+          "unit": "ml",
+          "choiceGroup": "beilage",
+          "choiceOption": "sauce"
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "name": "Kalte Brotzeit mit Brötchen oder Brot",
+      "servings": 4,
+      "cookingTime": "ca. 10–15 Minuten",
+      "description": "Für Sandra Käse beziehungsweise fleischfreien Belag vorsehen.",
+      "choiceGroups": [
+        {
+          "key": "backware",
+          "name": "Backware",
+          "mode": "one",
+          "default": [
+            "brot"
+          ],
+          "options": [
+            {
+              "key": "brot",
+              "label": "Brot"
+            },
+            {
+              "key": "broetchen",
+              "label": "Brötchen"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Brot",
+          "amount": 1,
+          "unit": "Stk",
+          "choiceGroup": "backware",
+          "choiceOption": "brot"
+        },
+        {
+          "name": "Brötchen",
+          "amount": {
+            "min": 6,
+            "max": 8
+          },
+          "unit": "Stk",
+          "choiceGroup": "backware",
+          "choiceOption": "broetchen"
+        },
+        {
+          "name": "Käse",
+          "amount": {
+            "min": 200,
+            "max": 300
+          },
+          "unit": "g"
+        },
+        {
+          "name": "Aufschnitt",
+          "amount": 200,
+          "unit": "g"
+        },
+        {
+          "name": "Butter oder Aufstriche",
+          "amount": null,
+          "unit": "nach Bedarf",
+          "pantryStaple": true
+        },
+        {
+          "name": "Gurke",
+          "amount": null,
+          "unit": "Stk"
+        },
+        {
+          "name": "Tomaten",
+          "amount": null,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "name": "Pizza Margherita oder Spinatpizza",
+      "servings": 4,
+      "cookingTime": "ca. 15–20 Minuten",
+      "description": "Margherita für Thore, Sandra und Timo; Spinatpizza hauptsächlich für Sandra. Mikas Sorte ist noch offen.",
+      "choiceGroups": [
+        {
+          "key": "sorte",
+          "name": "Sorten",
+          "mode": "any",
+          "default": [
+            "margherita"
+          ],
+          "options": [
+            {
+              "key": "margherita",
+              "label": "Margherita"
+            },
+            {
+              "key": "spinat",
+              "label": "Spinatpizza"
+            }
+          ]
+        }
+      ],
+      "ingredients": [
+        {
+          "name": "Pizza Margherita",
+          "amount": {
+            "min": 3,
+            "max": 4
+          },
+          "unit": "Stk",
+          "choiceGroup": "sorte",
+          "choiceOption": "margherita",
+          "note": "Insgesamt 3–4 Pizzen über alle Sorten, je nach Größe und Appetit"
+        },
+        {
+          "name": "Spinatpizza",
+          "amount": {
+            "min": 3,
+            "max": 4
+          },
+          "unit": "Stk",
+          "choiceGroup": "sorte",
+          "choiceOption": "spinat",
+          "note": "Insgesamt 3–4 Pizzen über alle Sorten, je nach Größe und Appetit"
+        },
+        {
+          "name": "Salat",
+          "amount": null,
+          "unit": "Stk",
+          "optional": true,
+          "note": "als Beilage"
+        }
+      ]
+    }
+  ]
 }

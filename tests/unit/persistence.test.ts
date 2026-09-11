@@ -26,12 +26,13 @@ import {
 import { exportBackup, restoreBackup, validateBackup } from '../../src/data/backup';
 import type { Meal } from '../../src/domain/types';
 import { BACKUP_FORMAT } from '../../src/domain/types';
+import { exactAmount } from '../../src/domain/types';
 
 const testMeal: Meal = {
   id: 'meal_test',
   name: 'Testgericht',
   ingredients: [
-    { id: 'i1', name: 'Nudeln', amount: 500, unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
+    { id: 'i1', name: 'Nudeln', amount: exactAmount(500), unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
   ],
   active: true,
   createdAt: '2026-01-01T00:00:00.000Z',

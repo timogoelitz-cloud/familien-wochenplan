@@ -4,63 +4,295 @@
   "title": "Familien-Wochenplan – Gericht-Import",
   "description": "Format, in dem Gerichte in die App importiert werden. Die App validiert jede Datei gegen diese Regeln und importiert im Fehlerfall NICHTS.",
   "type": "object",
-  "required": ["meals"],
+  "required": [
+    "meals"
+  ],
   "properties": {
-    "format": { "const": "familien-wochenplan/meals" },
-    "version": { "type": "integer", "minimum": 1 },
+    "format": {
+      "const": "familien-wochenplan/meals"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
     "meals": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/meal" }
+      "items": {
+        "$ref": "#/$defs/meal"
+      }
     }
   },
   "$defs": {
     "unit": {
       "description": "Erlaubte Mengeneinheiten. Andere Werte werden abgelehnt.",
-      "enum": ["g", "kg", "ml", "l", "Stk", "Pck", "Dose", "Glas", "Bund", "Scheibe", "EL", "TL", "Prise", "nach Bedarf"]
+      "enum": [
+        "g",
+        "kg",
+        "ml",
+        "l",
+        "Stk",
+        "Pck",
+        "Dose",
+        "Glas",
+        "Bund",
+        "Scheibe",
+        "EL",
+        "TL",
+        "Prise",
+        "nach Bedarf"
+      ]
     },
     "quantity": {
       "type": "object",
-      "required": ["amount", "unit"],
+      "required": [
+        "amount",
+        "unit"
+      ],
       "properties": {
-        "amount": { "type": "number", "exclusiveMinimum": 0 },
-        "unit": { "$ref": "#/$defs/unit" }
+        "amount": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "$ref": "#/$defs/unit"
+        }
       },
       "additionalProperties": false
     },
     "ingredient": {
       "type": "object",
-      "required": ["name", "amount", "unit"],
+      "required": [
+        "name",
+        "unit"
+      ],
       "properties": {
-        "name": { "type": "string", "minLength": 1, "description": "Produktname, z. B. \"Spaghetti\"." },
-        "amount": { "type": "number", "minimum": 0, "description": "Menge für die typische Familienportion." },
-        "unit": { "$ref": "#/$defs/unit" },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Produktname, z. B. \"Spaghetti\"."
+        },
+        "amount": {
+          "$ref": "#/$defs/amount"
+        },
+        "unit": {
+          "$ref": "#/$defs/unit"
+        },
         "merchant": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Name eines in der App angelegten Händlers. Unbekannte oder fehlende Namen werden zu \"Unklar\" – es wird nichts geraten."
         },
-        "category": { "type": "string", "description": "Optionale Warengruppe, z. B. \"Trockenware\"." },
+        "category": {
+          "type": "string",
+          "description": "Optionale Warengruppe, z. B. \"Trockenware\"."
+        },
         "packageSize": {
-          "oneOf": [{ "$ref": "#/$defs/quantity" }, { "type": "null" }],
+          "oneOf": [
+            {
+              "$ref": "#/$defs/quantity"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "Übliche Packungsgröße. Muss dieselbe Dimension haben wie \"unit\" (Masse zu Masse, Volumen zu Volumen), sonst wird keine Packungszahl berechnet."
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Zaehlt nur, wenn bei der Zuordnung dazugewaehlt."
+        },
+        "pantryStaple": {
+          "type": "boolean",
+          "description": "Oel, Gewuerze: nur Bestandspruefung, nie aufsummiert."
+        },
+        "choiceGroup": {
+          "type": "string",
+          "description": "Verweis auf choiceGroups[].key."
+        },
+        "choiceOption": {
+          "type": "string",
+          "description": "Verweis auf options[].key innerhalb der Gruppe."
+        }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "dependentRequired": {
+        "choiceGroup": [
+          "choiceOption"
+        ],
+        "choiceOption": [
+          "choiceGroup"
+        ]
+      }
     },
     "meal": {
       "type": "object",
-      "required": ["name", "ingredients"],
+      "required": [
+        "name",
+        "ingredients"
+      ],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "description": { "type": "string" },
-        "recipe": { "type": "string", "description": "Zubereitung als Fließtext." },
-        "image": { "type": ["string", "null"], "description": "Bild-URL oder data:-URL." },
-        "servings": { "type": "number", "exclusiveMinimum": 0, "description": "Anzahl Portionen, auf die sich die Mengen beziehen." },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "active": { "type": "boolean", "default": true },
-        "demo": { "type": "boolean", "description": "true kennzeichnet Testdaten, die NICHT aus echten Familienrezepten stammen." },
-        "ingredients": { "type": "array", "items": { "$ref": "#/$defs/ingredient" } }
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "recipe": {
+          "type": "string",
+          "description": "Zubereitung als Fließtext."
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Bild-URL oder data:-URL."
+        },
+        "servings": {
+          "oneOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Personenzahl, auf die sich die Mengen beziehen. null = ausdruecklich nicht beziffert, wird nie hochgerechnet."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "active": {
+          "type": "boolean",
+          "default": true
+        },
+        "demo": {
+          "type": "boolean",
+          "description": "true kennzeichnet Testdaten, die NICHT aus echten Familienrezepten stammen."
+        },
+        "ingredients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ingredient"
+          }
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Feste Gerichtnummer (bei uns 1-17)."
+        },
+        "cookingTime": {
+          "type": "string",
+          "description": "Freitext, z. B. \"ca. 20 Minuten\"."
+        },
+        "choiceGroups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/choiceGroup"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "amount": {
+      "description": "Menge: Zahl, Bereich {min,max}, Text \"700-800\" oder null fuer \"Menge offen\".",
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "choiceGroup": {
+      "type": "object",
+      "required": [
+        "key",
+        "name",
+        "options"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Interner Schluessel, auf den Zutaten verweisen."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Ueberschrift, z. B. \"Beilage\"."
+        },
+        "mode": {
+          "enum": [
+            "one",
+            "any"
+          ],
+          "default": "one",
+          "description": "\"one\" = genau eine Option, \"any\" = mehrere moeglich."
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "label"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "default": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Vorausgewaehlte Options-Schluessel."
+        }
       },
       "additionalProperties": false
     }

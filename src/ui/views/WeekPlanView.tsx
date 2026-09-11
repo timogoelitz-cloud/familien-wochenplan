@@ -22,7 +22,15 @@ import {
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { ID, Meal, MealAssignment, Person } from '../../domain/types';
 import { WEEKDAY_SHORT, formatDayMonthDE, todayISO, weekDates, weekdayName } from '../../domain/week';
-import { addAssignment, moveAssignment, removeAssignment, togglePerson } from '../../data/repositories';
+import {
+  addAssignment,
+  moveAssignment,
+  removeAssignment,
+  setChoice,
+  toggleOptionalIngredient,
+  togglePerson,
+} from '../../data/repositories';
+import { effectiveChoices } from '../../domain/shoppingList';
 import { useApp, useAppData, useMealMap, useWeek } from '../store';
 import { WeekNavigator } from '../components/WeekNavigator';
 import { PersonBadges, PersonChip } from '../components/PersonChip';
@@ -70,7 +78,10 @@ function PoolCard({ meal, armed, onArm }: { meal: Meal; armed: boolean; onArm: (
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-bold">{meal.name}</span>
+          <span className="block truncate text-sm font-bold">
+            {meal.number ? <span className="opacity-50">{meal.number}. </span> : null}
+            {meal.name}
+          </span>
           <span className="block truncate text-xs text-[color:var(--color-muted)]">
             {meal.demo ? 'DEMO · ' : ''}
             {meal.ingredients.length} Zutat{meal.ingredients.length === 1 ? '' : 'en'}
@@ -154,7 +165,7 @@ function AssignmentCard({ assignment, meal, persons, expanded, onToggleExpanded 
   });
 
   const assignedPersons = persons.filter((person) => assignment.personIds.includes(person.id));
-  const title = meal?.name ?? 'Unbekanntes Gericht';
+  const title = meal ? (meal.number ? `${meal.number}. ${meal.name}` : meal.name) : 'Unbekanntes Gericht';
 
   return (
     <div
@@ -202,6 +213,90 @@ function AssignmentCard({ assignment, meal, persons, expanded, onToggleExpanded 
                 onToggle={() => void togglePerson(assignment.id, person.id)}
               />
             ))}
+          </div>
+
+          {meal && <ChoiceEditor meal={meal} assignment={assignment} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Auswahl je Zuordnung: Beilage, Variante und optionale Zutaten.
+ * Nur was hier gewaehlt ist, landet spaeter auf der Einkaufsliste.
+ */
+function ChoiceEditor({ meal, assignment }: { meal: Meal; assignment: MealAssignment }) {
+  const groups = meal.choiceGroups ?? [];
+  const optionalIngredients = meal.ingredients.filter((ingredient) => ingredient.optional);
+  if (groups.length === 0 && optionalIngredients.length === 0) return null;
+
+  const chosen = effectiveChoices(meal, assignment);
+  const selectedOptional = assignment.optionalIngredientIds ?? [];
+
+  return (
+    <div className="mt-3 space-y-3 border-t border-dashed border-[color:var(--color-line)] pt-3">
+      {groups.map((group) => (
+        <div key={group.id}>
+          <p className="mb-1.5 text-sm font-semibold text-[color:var(--color-muted)]">
+            {group.name}
+            {group.mode === 'any' && <span className="font-normal"> (mehrere möglich)</span>}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {group.options.map((option) => {
+              const active = (chosen[group.id] ?? []).includes(option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    const current = chosen[group.id] ?? [];
+                    const next =
+                      group.mode === 'one'
+                        ? [option.id]
+                        : current.includes(option.id)
+                          ? current.filter((id) => id !== option.id)
+                          : [...current, option.id];
+                    void setChoice(assignment.id, group.id, next);
+                  }}
+                  className={`tap rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors ${
+                    active
+                      ? 'border-transparent bg-[color:var(--color-sage)] text-white'
+                      : 'border-dashed border-[color:var(--color-line)] bg-white text-[color:var(--color-muted)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {optionalIngredients.length > 0 && (
+        <div>
+          <p className="mb-1.5 text-sm font-semibold text-[color:var(--color-muted)]">Optional dazu</p>
+          <div className="flex flex-wrap gap-1.5">
+            {optionalIngredients.map((ingredient) => {
+              const active = selectedOptional.includes(ingredient.id);
+              return (
+                <button
+                  key={ingredient.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => void toggleOptionalIngredient(assignment.id, ingredient.id)}
+                  className={`tap rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors ${
+                    active
+                      ? 'border-transparent bg-[color:var(--color-sage)] text-white'
+                      : 'border-dashed border-[color:var(--color-line)] bg-white text-[color:var(--color-muted)]'
+                  }`}
+                >
+                  {active ? '✓ ' : '+ '}
+                  {ingredient.name}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

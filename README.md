@@ -164,18 +164,44 @@ Familienmitglieder (Name, Kürzel, Farbe), Händler, Name der Apple-Erinnerungen
 
 ---
 
-## Die 17 echten Gerichte
+## Unsere 17 Gerichte
 
-Unsere 17 Familiengerichte sind **bewusst nicht** im Code hinterlegt: Die vollständigen Zutaten,
-Mengen und Händlerzuordnungen lagen bei der Entwicklung nicht vor, und geratene Rezeptdaten wären in
-einer Einkaufsliste schlimmer als gar keine.
+Unsere 17 Familiengerichte sind in [`data/meals.seed.json`](data/meals.seed.json) hinterlegt und
+fest in die App eingebaut. Ein Tipp auf **Gerichte → „Unsere 17 Gerichte"** lädt sie – doppelt
+angelegt wird dabei nichts, erkannt wird an der festen Gerichtnummer.
 
-**So kommen sie hinein:**
+Die Mengen sind **Planungsrichtwerte für vier Personen**, sofern beim Gericht nichts anderes steht.
+Alles ist im Gericht-Editor bearbeitbar.
 
-1. `data/meals.seed.json` öffnen (die Datei ist vorbereitet und enthält eine leere `meals`-Liste).
-2. Die Gerichte dort eintragen. Format: [`data/meal.schema.json`](data/meal.schema.json),
-   ausgefülltes Beispiel: [`data/meals.example.json`](data/meals.example.json).
-3. In der App: **Gerichte → Importieren** → Datei auswählen.
+### Wie Mengen hinterlegt sind
+
+| Art | Beispiel | Verhalten |
+| --- | --- | --- |
+| feste Menge | 500 g Nudeln | wird aufsummiert |
+| Bereich | 700–800 ml passierte Tomaten | bleibt Bereich; Ober- und Untergrenze werden getrennt addiert |
+| Menge offen | Öl, Gewürze, Wasser | wird **nie** aufsummiert, erscheint unter „Bitte nachsehen“ |
+
+Eine fehlende Menge wird bewusst zu „offen“ und nicht zu 0 – eine erfundene Zahl auf dem
+Einkaufszettel wäre schlimmer als gar keine.
+
+### Varianten und Optionen
+
+Gerichte können **Auswahlgruppen** haben. Nur die gewählte Option landet auf der Einkaufsliste:
+
+- Gericht 10: *Beilage* – Kartoffeln **oder** Reis
+- Gericht 14: *Variante* – Fertigprodukt **oder** selbst gekocht
+- Gericht 9: *Variante* – mit **oder** ohne Hackfleisch
+- Gericht 1: *Nudelart* – normale Nudeln **oder** Dinkelnudeln (für Thore)
+- Gericht 17: *Sorten* – Margherita und/oder Spinatpizza (mehrere möglich)
+
+**Optionale Zutaten** („Optional: geriebener Käse“) zählen erst, wenn sie bei der Zuordnung
+angetippt werden. Beides stellst du im Wochenplan ein: Gerichtskarte antippen, dann Variante
+und Extras wählen.
+
+### Eigene Gerichte importieren
+
+Format: [`data/meal.schema.json`](data/meal.schema.json), ausgefülltes Beispiel:
+[`data/meals.example.json`](data/meals.example.json). In der App: **Gerichte → Importieren**.
 
 Die App prüft die Datei vorher vollständig. Stimmt etwas nicht, wird **nichts** importiert und
 genau angezeigt, welches Feld das Problem verursacht (z. B. `meals[3].ingredients[1].unit`).

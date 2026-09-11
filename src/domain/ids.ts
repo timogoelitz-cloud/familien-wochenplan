@@ -26,3 +26,6 @@ export const newPersonId = () => newId('per');
 export function nowISO(): string {
   return new Date().toISOString();
 }
+
+export const newChoiceGroupId = () => newId('grp');
+export const newChoiceOptionId = () => newId('opt');

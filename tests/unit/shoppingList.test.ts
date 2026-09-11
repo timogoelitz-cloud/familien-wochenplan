@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildShoppingList, groupByMerchant, shoppingProgress } from '../../src/domain/shoppingList';
 import { aggregationKey } from '../../src/domain/aggregate';
 import type { Meal, MealAssignment, Merchant, ShoppingListItem } from '../../src/domain/types';
+import { exactAmount } from '../../src/domain/types';
 
 const merchants: Merchant[] = [
   { id: 'mer_kueck', name: 'Kück Biomarkt', order: 0, active: true },
@@ -21,13 +22,13 @@ function meal(id: string, name: string, ingredients: Meal['ingredients']): Meal 
 }
 
 const spaghetti = meal('meal_spaghetti', 'Spaghetti', [
-  { id: 'i1', name: 'Spaghetti', amount: 500, unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
-  { id: 'i2', name: 'Hackfleisch', amount: 400, unit: 'g', merchantId: null },
+  { id: 'i1', name: 'Spaghetti', amount: exactAmount(500), unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
+  { id: 'i2', name: 'Hackfleisch', amount: exactAmount(400), unit: 'g', merchantId: null },
 ]);
 
 const auflauf = meal('meal_auflauf', 'Auflauf', [
-  { id: 'i3', name: 'Spaghetti', amount: 300, unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
-  { id: 'i4', name: 'Shampoo', amount: 1, unit: 'Stk', merchantId: 'mer_dm' },
+  { id: 'i3', name: 'Spaghetti', amount: exactAmount(300), unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
+  { id: 'i4', name: 'Shampoo', amount: exactAmount(1), unit: 'Stk', merchantId: 'mer_dm' },
 ]);
 
 function assignment(id: string, date: string, mealId: string, position = 0): MealAssignment {

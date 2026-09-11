@@ -22,8 +22,9 @@ test('Gericht von Hand anlegen', async ({ page }) => {
   await dialog.getByLabel('Name').fill('Kartoffelsuppe');
   await dialog.getByRole('button', { name: '+ Zutat' }).click();
   await dialog.getByLabel('Zutat 1 – Name').fill('Kartoffeln');
-  await dialog.getByLabel('Zutat 1 – Menge').fill('1000');
-  await dialog.getByLabel('Zutat 1 – Einheit').selectOption('g');
+  // exact: true, damit nicht die Auswahl "Zutat 1 – Mengenart" getroffen wird.
+  await dialog.getByLabel('Zutat 1 – Menge', { exact: true }).fill('1000');
+  await dialog.getByLabel('Zutat 1 – Einheit', { exact: true }).selectOption('g');
   await dialog.getByRole('button', { name: 'Speichern' }).click();
 
   await expect(page.getByRole('heading', { name: 'Kartoffelsuppe' })).toBeVisible();

@@ -66,12 +66,69 @@ export interface Quantity {
   unit: Unit;
 }
 
+/**
+ * Mengenangabe einer Zutat. Bewusst drei Faelle statt einer blanken Zahl:
+ *
+ *  - `exact` : "500 g Nudeln"
+ *  - `range` : "700-800 ml passierte Tomaten" -- Planungsrichtwerte, die nicht
+ *              auf einen Wert zusammengestaucht werden duerfen
+ *  - `open`  : "Etwas Oel", "Kraeuter und Gewuerze" -- bewusst unbeziffert.
+ *              Solche Zutaten werden NICHT aufsummiert, sondern erscheinen in
+ *              der Einkaufsliste als eigener Block zur Bestandspruefung. Eine
+ *              erfundene Zahl waere schlimmer als gar keine.
+ */
+export type AmountSpec =
+  | { kind: 'exact'; value: number }
+  | { kind: 'range'; min: number; max: number }
+  | { kind: 'open' };
+
+export const AMOUNT_OPEN: AmountSpec = { kind: 'open' };
+
+export function exactAmount(value: number): AmountSpec {
+  return { kind: 'exact', value };
+}
+
+export function rangeAmount(min: number, max: number): AmountSpec {
+  return { kind: 'range', min, max };
+}
+
+/** Untergrenze einer Menge (fuer `open`: null). */
+export function amountMin(spec: AmountSpec): number | null {
+  if (spec.kind === 'exact') return spec.value;
+  if (spec.kind === 'range') return spec.min;
+  return null;
+}
+
+/** Obergrenze einer Menge. Nach ihr wird eingekauft -- lieber etwas uebrig. */
+export function amountMax(spec: AmountSpec): number | null {
+  if (spec.kind === 'exact') return spec.value;
+  if (spec.kind === 'range') return spec.max;
+  return null;
+}
+
+/**
+ * Auswahlgruppe innerhalb eines Gerichts, z. B. "Beilage: Reis oder Kartoffeln"
+ * oder "Teig: selbst gemacht oder fertig".
+ *
+ * Nur die Zutaten der gewaehlten Option kommen auf die Einkaufsliste.
+ */
+export interface MealChoiceGroup {
+  id: ID;
+  /** Ueberschrift, z. B. "Beilage". */
+  name: string;
+  /** 'one' = genau eine Option, 'any' = beliebig viele (auch keine). */
+  mode: 'one' | 'any';
+  options: Array<{ id: ID; label: string }>;
+  /** Vorauswahl, wenn ein Gericht einem Tag zugeordnet wird. */
+  defaultOptionIds: ID[];
+}
+
 /** Eine Zutat innerhalb eines Gerichts. */
 export interface MealIngredient {
   id: ID;
   /** Anzeigename, z. B. "Spaghetti". */
   name: string;
-  amount: number;
+  amount: AmountSpec;
   unit: Unit;
   /** Bevorzugter Haendler. Leer => wird der Gruppe "Unklar" zugeordnet. */
   merchantId: ID | null;
@@ -80,19 +137,46 @@ export interface MealIngredient {
   /** Optionale Packungsgroesse, z. B. 500 g. */
   packageSize?: Quantity | null;
   note?: string;
+  /**
+   * Zutat ist optional ("Optional: geriebener Kaese"). Sie zaehlt nur, wenn
+   * sie bei der Zuordnung ausdruecklich dazugewaehlt wird.
+   */
+  optional?: boolean;
+  /** Gehoert zu dieser Auswahlgruppe (siehe MealChoiceGroup). */
+  choiceGroupId?: ID;
+  /** Gehoert innerhalb der Gruppe zu dieser Option. */
+  choiceOptionId?: ID;
+  /**
+   * Vorratsartikel wie Oel, Salz oder Gewuerze. Wird nie aufsummiert, sondern
+   * nur zur Bestandspruefung angezeigt -- man kauft kein Salz je Gericht.
+   */
+  pantryStaple?: boolean;
 }
 
 /** Ein Gericht mit Rezept und Zutaten. */
 export interface Meal {
   id: ID;
+  /**
+   * Feste Nummer aus unserer Gerichteliste (1-17). Bleibt dauerhaft erhalten,
+   * auch wenn das Gericht umbenannt oder umsortiert wird.
+   */
+  number?: number;
   name: string;
   description?: string;
   /** Freitext-Zubereitung. */
   recipe?: string;
   /** Bild als Data-URL (Upload) oder externe URL. */
   image?: string | null;
-  /** Typische Familienmenge, auf die sich die Zutatenmengen beziehen. */
-  servings?: number;
+  /**
+   * Personenzahl, auf die sich die Mengen beziehen.
+   * `null` bedeutet ausdruecklich "nicht beziffert" -- dann wird nie
+   * automatisch hochgerechnet, weil die Basis unbekannt ist.
+   */
+  servings?: number | null;
+  /** Ungefaehre Zubereitungsdauer als Freitext, z. B. "ca. 20 Minuten". */
+  cookingTime?: string;
+  /** Auswahlgruppen (Beilage, Teig, Variante ...). */
+  choiceGroups?: MealChoiceGroup[];
   ingredients: MealIngredient[];
   tags?: string[];
   /** Klar gekennzeichnete Demo-Daten, die nicht aus echten Familienrezepten stammen. */
@@ -113,6 +197,13 @@ export interface MealAssignment {
   date: ISODate;
   mealId: ID;
   personIds: ID[];
+  /**
+   * Getroffene Auswahl je Auswahlgruppe: Gruppen-ID -> gewaehlte Options-IDs.
+   * Fehlt ein Eintrag, gilt die Vorauswahl des Gerichts.
+   */
+  choices?: Record<ID, ID[]>;
+  /** IDs optionaler Zutaten, die ausdruecklich dazugewaehlt wurden. */
+  optionalIngredientIds?: ID[];
   /** Sortierung innerhalb eines Tages. */
   position: number;
   note?: string;
@@ -163,8 +254,10 @@ export interface AppSettings {
 /** Einzelner Bedarfsposten, bevor aggregiert wird. */
 export interface DemandLine {
   ingredientName: string;
-  amount: number;
+  amount: AmountSpec;
   unit: Unit;
+  /** Vorratsartikel (Oel, Gewuerze): nur Bestandspruefung, keine Summe. */
+  pantryStaple?: boolean;
   merchantId: ID | null;
   packageSize?: Quantity | null;
   category?: string;
@@ -189,14 +282,21 @@ export interface ShoppingListItem {
   /** Stabiler Schluessel: Name + Dimension + Haendler. */
   key: string;
   name: string;
-  /** Bedarf in der gewaehlten Anzeigeeinheit. */
+  /**
+   * Untergrenze des Bedarfs in der Anzeigeeinheit. Bei reinen Festmengen
+   * identisch mit `amountMax`.
+   */
   amount: number;
+  /** Obergrenze des Bedarfs. Nach ihr wird die Packungszahl berechnet. */
+  amountUpper: number;
+  /** true, wenn sich der Bedarf aus mindestens einem Bereich ergibt. */
+  isRange: boolean;
   unit: Unit;
   merchantId: ID | null;
   category?: string;
   packaging: PackagingResult | null;
   /** Woraus sich der Bedarf zusammensetzt (fuer die Detailanzeige). */
-  sources: Array<{ mealName: string; date: ISODate; amount: number; unit: Unit }>;
+  sources: Array<{ mealName: string; date: ISODate; amount: AmountSpec; unit: Unit }>;
   state: ShoppingLineState;
 }
 
@@ -216,6 +316,11 @@ export interface ShoppingList {
   groups: ShoppingGroup[];
   /** Alle Zeilen, auch die als "vorhanden" markierten. */
   allItems: ShoppingListItem[];
+  /**
+   * Zutaten ohne bezifferte Menge (Oel, Gewuerze, Wasser) sowie Vorratsartikel.
+   * Sie werden nicht aufsummiert, sondern nur zum Nachsehen aufgefuehrt.
+   */
+  pantryChecks: ShoppingListItem[];
 }
 
 /* ------------------------------------------------------------------ *

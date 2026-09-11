@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { aggregateDemand, aggregationKey, normalizeIngredientName } from '../../src/domain/aggregate';
 import type { DemandLine } from '../../src/domain/types';
+import { exactAmount } from '../../src/domain/types';
 
-function line(partial: Partial<DemandLine> & Pick<DemandLine, 'ingredientName' | 'amount' | 'unit'>): DemandLine {
+function line(
+  partial: Omit<Partial<DemandLine>, 'amount'> &
+    Pick<DemandLine, 'ingredientName' | 'unit'> & { amount: number | DemandLine['amount'] },
+): DemandLine {
   return {
     merchantId: 'mer_kueck',
     packageSize: null,
@@ -10,7 +14,13 @@ function line(partial: Partial<DemandLine> & Pick<DemandLine, 'ingredientName' |
     mealName: 'Testgericht',
     date: '2026-09-14',
     ...partial,
+    amount: typeof partial.amount === 'number' ? exactAmount(partial.amount) : partial.amount,
   };
+}
+
+/** Nur die summierten Positionen -- kuerzt die Tests unten ab. */
+function items(lines: DemandLine[]) {
+  return aggregateDemand(lines).items;
 }
 
 describe('Namensnormalisierung', () => {
@@ -33,7 +43,7 @@ describe('Namensnormalisierung', () => {
 
 describe('Zutatenaggregation', () => {
   it('fuehrt gleiche Zutaten zusammen (Beispiel aus der Aufgabenstellung)', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Nudeln', amount: 500, unit: 'g', mealName: 'Gericht A' }),
       line({ ingredientName: 'Nudeln', amount: 300, unit: 'g', mealName: 'Gericht B' }),
     ]);
@@ -44,7 +54,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('rechnet kompatible Einheiten um', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Mehl', amount: 1, unit: 'kg' }),
       line({ ingredientName: 'Mehl', amount: 500, unit: 'g' }),
     ]);
@@ -55,13 +65,13 @@ describe('Zutatenaggregation', () => {
   });
 
   it('bleibt unter 1000 g bei Gramm', () => {
-    const result = aggregateDemand([line({ ingredientName: 'Mehl', amount: 800, unit: 'g' })]);
+    const result = items([line({ ingredientName: 'Mehl', amount: 800, unit: 'g' })]);
     expect(result[0]!.unit).toBe('g');
     expect(result[0]!.amount).toBe(800);
   });
 
   it('fuehrt unterschiedliche Einheiten NICHT faelschlich zusammen', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Tomaten', amount: 400, unit: 'g' }),
       line({ ingredientName: 'Tomaten', amount: 2, unit: 'Dose' }),
     ]);
@@ -69,7 +79,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('trennt Masse und Volumen', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Sahne', amount: 200, unit: 'g' }),
       line({ ingredientName: 'Sahne', amount: 200, unit: 'ml' }),
     ]);
@@ -77,7 +87,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('trennt unterschiedliche Stueckeinheiten', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Tomaten', amount: 1, unit: 'Dose' }),
       line({ ingredientName: 'Tomaten', amount: 1, unit: 'Glas' }),
     ]);
@@ -85,7 +95,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('trennt nach Haendler', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Nudeln', amount: 500, unit: 'g', merchantId: 'mer_kueck' }),
       line({ ingredientName: 'Nudeln', amount: 500, unit: 'g', merchantId: 'mer_aldi' }),
     ]);
@@ -93,7 +103,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('fuehrt unterschiedlich geschriebene gleiche Zutaten zusammen', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Möhren', amount: 300, unit: 'g' }),
       line({ ingredientName: 'moehren', amount: 200, unit: 'g' }),
     ]);
@@ -104,7 +114,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('uebernimmt die Packungsgroesse und rechnet Packungen', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Spaghetti', amount: 500, unit: 'g', packageSize: { amount: 500, unit: 'g' } }),
       line({ ingredientName: 'Spaghetti', amount: 300, unit: 'g' }),
     ]);
@@ -114,7 +124,7 @@ describe('Zutatenaggregation', () => {
   });
 
   it('ignoriert Zeilen ohne Menge', () => {
-    const result = aggregateDemand([
+    const result = items([
       line({ ingredientName: 'Salz', amount: 0, unit: 'g' }),
       line({ ingredientName: 'Nudeln', amount: 500, unit: 'g' }),
     ]);

@@ -8,6 +8,7 @@ import { createShoppingListPdf, shoppingListFileName, shoppingListPdfBlob } from
 import { shoppingListAsReminderLines, shoppingListAsText } from '../../src/services/share';
 import { buildShoppingList } from '../../src/domain/shoppingList';
 import type { Meal, MealAssignment, Merchant } from '../../src/domain/types';
+import { exactAmount } from '../../src/domain/types';
 
 const merchants: Merchant[] = [
   { id: 'mer_kueck', name: 'Kück Biomarkt', order: 0, active: true },
@@ -18,9 +19,9 @@ const meal: Meal = {
   id: 'meal_1',
   name: 'Testgericht mit Umlauten: Möhren & Weißkohl',
   ingredients: [
-    { id: 'i1', name: 'Spaghetti', amount: 800, unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
-    { id: 'i2', name: 'Möhren', amount: 500, unit: 'g', merchantId: 'mer_aldi' },
-    { id: 'i3', name: 'Salz', amount: 1, unit: 'Prise', merchantId: null },
+    { id: 'i1', name: 'Spaghetti', amount: exactAmount(800), unit: 'g', merchantId: 'mer_kueck', packageSize: { amount: 500, unit: 'g' } },
+    { id: 'i2', name: 'Möhren', amount: exactAmount(500), unit: 'g', merchantId: 'mer_aldi' },
+    { id: 'i3', name: 'Salz', amount: exactAmount(1), unit: 'Prise', merchantId: null },
   ],
   active: true,
   createdAt: '2026-01-01T00:00:00.000Z',

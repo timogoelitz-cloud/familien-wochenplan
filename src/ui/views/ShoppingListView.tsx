@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import { buildShoppingList, shoppingProgress } from '../../domain/shoppingList';
-import { formatQuantity } from '../../domain/units';
+import { formatAmountSpec, formatQuantity, formatRange } from '../../domain/units';
 import { formatWeekLabel, formatWeekRange, weekdayName } from '../../domain/week';
 import type { ShoppingListItem } from '../../domain/types';
 import { resetChecked, resetPantry, setLineState } from '../../data/repositories';
@@ -65,7 +65,9 @@ function ItemRow({
             )}
           </span>
           <span className="shrink-0 py-1.5 text-right font-bold whitespace-nowrap">
-            {formatQuantity(item.amount, item.unit)}
+            {item.isRange
+              ? formatRange(item.amount, item.amountUpper, item.unit)
+              : formatQuantity(item.amountUpper, item.unit)}
           </span>
         </button>
         <button
@@ -81,7 +83,7 @@ function ItemRow({
         <ul className="mb-2 ml-11 space-y-0.5 text-sm text-[color:var(--color-muted)]">
           {item.sources.map((source, index) => (
             <li key={`${source.mealName}-${source.date}-${index}`}>
-              {weekdayName(source.date)}: {source.mealName} – {formatQuantity(source.amount, source.unit)}
+              {weekdayName(source.date)}: {source.mealName} – {formatAmountSpec(source.amount, source.unit)}
             </li>
           ))}
         </ul>
@@ -247,6 +249,41 @@ export function ShoppingListView() {
           <p className="card p-6 text-[color:var(--color-muted)]">
             Alles bereits im Vorrat – es muss nichts eingekauft werden.
           </p>
+        )}
+
+        {list.pantryChecks.length > 0 && (
+          <section className="card mb-4 overflow-hidden" aria-label="Bitte im Vorrat nachsehen">
+            <h2 className="bg-[color:var(--color-parchment)] px-4 py-2.5 text-base font-bold tracking-wide uppercase">
+              Bitte nachsehen
+              <span className="ml-2 text-sm font-semibold normal-case opacity-60">
+                ohne feste Menge
+              </span>
+            </h2>
+            <p className="px-4 pt-3 text-sm text-[color:var(--color-muted)]">
+              Öl, Gewürze und Ähnliches werden nicht zusammengerechnet – hier steht nur, was diese
+              Woche gebraucht wird.
+            </p>
+            <ul className="flex flex-wrap gap-2 p-4">
+              {list.pantryChecks.map((item) => (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={item.state.inPantry}
+                    onClick={() => void setLineState(weekId, item.key, { inPantry: !item.state.inPantry })}
+                    className={`tap rounded-full border-2 px-4 text-sm font-semibold transition-colors ${
+                      item.state.inPantry
+                        ? 'border-transparent bg-[color:var(--color-sage)] text-white'
+                        : 'border-[color:var(--color-line)] bg-white'
+                    }`}
+                  >
+                    {item.state.inPantry ? '✓ ' : ''}
+                    {item.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <div className="space-y-4">

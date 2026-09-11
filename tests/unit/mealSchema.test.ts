@@ -78,14 +78,59 @@ describe('Gericht-Import', () => {
     expect(result.ok).toBe(false);
   });
 
-  it('lehnt fehlende oder unlesbare Mengen ab', () => {
-    const noAmount = parseMealImport({ meals: [{ name: 'T', ingredients: [{ name: 'Mehl', unit: 'g' }] }] }, resolve);
-    expect(noAmount.ok).toBe(false);
+  it('behandelt eine fehlende Menge als "offen", nicht als 0', () => {
+    // Oel und Gewuerze haben bewusst keine Zahl. Eine erfundene 0 waere
+    // schlimmer als gar keine Angabe.
+    const result = parseMealImport(
+      { meals: [{ name: 'T', ingredients: [{ name: 'Öl', unit: 'nach Bedarf' }] }] },
+      resolve,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value[0]!.ingredients[0]!.amount).toEqual({ kind: 'open' });
+  });
+
+  it('lehnt negative und unlesbare Mengen ab', () => {
     const negative = parseMealImport(
       { meals: [{ name: 'T', ingredients: [{ name: 'Mehl', amount: -5, unit: 'g' }] }] },
       resolve,
     );
     expect(negative.ok).toBe(false);
+
+    const nonsense = parseMealImport(
+      { meals: [{ name: 'T', ingredients: [{ name: 'Mehl', amount: 'viel', unit: 'g' }] }] },
+      resolve,
+    );
+    expect(nonsense.ok).toBe(false);
+  });
+
+  it('liest Mengenbereiche als Bereich ein', () => {
+    const fromObject = parseMealImport(
+      { meals: [{ name: 'T', ingredients: [{ name: 'Tomaten', amount: { min: 700, max: 800 }, unit: 'ml' }] }] },
+      resolve,
+    );
+    expect(fromObject.ok).toBe(true);
+    if (fromObject.ok) {
+      expect(fromObject.value[0]!.ingredients[0]!.amount).toEqual({ kind: 'range', min: 700, max: 800 });
+    }
+
+    // Auch als Text, wie er aus einer Rezeptliste kommt.
+    const fromText = parseMealImport(
+      { meals: [{ name: 'T', ingredients: [{ name: 'Tomaten', amount: '700–800', unit: 'ml' }] }] },
+      resolve,
+    );
+    expect(fromText.ok).toBe(true);
+    if (fromText.ok) {
+      expect(fromText.value[0]!.ingredients[0]!.amount).toEqual({ kind: 'range', min: 700, max: 800 });
+    }
+  });
+
+  it('lehnt Bereiche ab, deren Untergrenze groesser als die Obergrenze ist', () => {
+    const result = parseMealImport(
+      { meals: [{ name: 'T', ingredients: [{ name: 'X', amount: { min: 900, max: 100 }, unit: 'g' }] }] },
+      resolve,
+    );
+    expect(result.ok).toBe(false);
   });
 
   it('toleriert deutsche Dezimalkommata aus Sprachmodell-Ausgaben', () => {
@@ -95,7 +140,7 @@ describe('Gericht-Import', () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value[0]!.ingredients[0]!.amount).toBeCloseTo(0.2);
+    expect(result.value[0]!.ingredients[0]!.amount).toEqual({ kind: 'exact', value: 0.2 });
   });
 
   it('lehnt voellig falsche Strukturen verstaendlich ab', () => {
@@ -137,6 +182,6 @@ describe('Gericht-Import', () => {
     expect(reimported.ok).toBe(true);
     if (!reimported.ok) return;
     expect(reimported.value[0]!.ingredients[0]!.merchantId).toBe('mer_kueck');
-    expect(reimported.value[0]!.ingredients[0]!.amount).toBe(800);
+    expect(reimported.value[0]!.ingredients[0]!.amount).toEqual({ kind: 'exact', value: 800 });
   });
 });
