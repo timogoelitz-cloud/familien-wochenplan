@@ -3,7 +3,16 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/*
+ * Unterverzeichnis, unter dem die App ausgeliefert wird.
+ * Lokal ("/") ebenso wie auf GitHub Pages, wo eine Projektseite immer unter
+ * /<repository-name>/ liegt. Ueber VITE_BASE ueberschreibbar, damit derselbe
+ * Build auch woanders ausgeliefert werden kann.
+ */
+const base = process.env.VITE_BASE ?? '/';
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -15,8 +24,9 @@ export default defineConfig({
         short_name: 'Wochenplan',
         description: 'Wochenplan fuer das Mittagessen und automatische Einkaufsliste.',
         lang: 'de-DE',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
+        id: base,
         display: 'standalone',
         orientation: 'any',
         background_color: '#fbf7f0',

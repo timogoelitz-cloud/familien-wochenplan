@@ -1,0 +1,66 @@
+# Baut die App und veroeffentlicht sie auf GitHub Pages.
+#
+# Voraussetzung, einmalig im Repository einzustellen:
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+#
+# Hinweis: Bei einem PRIVATEN Repository ist GitHub Pages nur mit einem
+# kostenpflichtigen Plan verfuegbar. Bei einem oeffentlichen Repository ist es
+# kostenlos.
+name: Deploy auf GitHub Pages
+
+on:
+  push:
+    branches: [claude/family-meal-planner-app-i8jtl6]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Laufende Veroeffentlichungen nicht gegenseitig ueberholen lassen.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Nicht kaputt veroeffentlichen: erst pruefen, dann bauen.
+      - name: Typen pruefen
+        run: npm run typecheck
+
+      - name: Unit-Tests
+        run: npm test
+
+      - name: Bauen
+        env:
+          # Projektseiten liegen immer unter /<repository-name>/.
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
